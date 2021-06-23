@@ -1,0 +1,30 @@
+Package: hornsharkHMM
+Title: Functions For Analysing Horn Shark Data Using Hidden Markov Models
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Jessica",
+           family = "Long",
+           role = c("aut", "cre"),
+           email = "jessica.y.long@gmail.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    bayesforecast,
+    chron,
+    dplyr,
+    GGally,
+    ggfortify,
+    ggplot2,
+    gridExtra,
+    lemon,
+    mvtnorm,
+    plyr,
+    RColorBrewer,
+    stats,
+    tidyr,
+    utils

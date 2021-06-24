@@ -315,10 +315,10 @@ norm_bootstrap_ci <- function(mod, bootstrap, alpha, m) {
   bootstrap2 <- data_frame(gamma = bootstrap$gamma)
   for (i in 1:m) {
     if (i == m) {
-      foo <- bootstrap1 %>% filter((row_number() %% m) == 0)
+      foo <- bootstrap1 %>% dplyr::filter((row_number() %% m) == 0)
     }
     else {
-      foo <- bootstrap1 %>% filter((row_number() %% m) == i)
+      foo <- bootstrap1 %>% dplyr::filter((row_number() %% m) == i)
     }
     mu_lower[i] <- 2 * mod$mu[i] -
       quantile(foo$mu, 1 - (alpha / 2), names = FALSE)
@@ -335,10 +335,10 @@ norm_bootstrap_ci <- function(mod, bootstrap, alpha, m) {
   }
   for (i in 1:(m * m)) {
     if (i == (m * m)) {
-      foo <- bootstrap2 %>% filter((row_number() %% (m * m)) == 0)
+      foo <- bootstrap2 %>% dplyr::filter((row_number() %% (m * m)) == 0)
     }
     else {
-      foo <- bootstrap2 %>% filter((row_number() %% (m * m)) == i)
+      foo <- bootstrap2 %>% dplyr::filter((row_number() %% (m * m)) == i)
     }
 
     gamma_lower[i] <- 2 * mod$gamma[i] -

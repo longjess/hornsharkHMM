@@ -1,3 +1,5 @@
+#' @param mat
+#'
 #' @import bayesforecast
 #' @import chron
 #' @import dplyr
@@ -12,6 +14,7 @@
 #' @import stats
 #' @import tidyr
 #' @import utils
+
 
 diag_exp <- function(mat) {
   diag(mat) <- exp(diag(mat))

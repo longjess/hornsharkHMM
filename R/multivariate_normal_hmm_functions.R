@@ -321,11 +321,11 @@ mvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
     for (j in 1:k) {
       if (i == m & j == k) {
         foo <- bootstrap_mu %>%
-          filter((row_number() %% (m * k)) == 0)
+          dplyr::filter((row_number() %% (m * k)) == 0)
       }
       else {
         foo <- bootstrap_mu %>%
-          filter((row_number() %% (m * k)) == (i - 1) * k + j)
+          dplyr::filter((row_number() %% (m * k)) == (i - 1) * k + j)
       }
       mu_lower[i, j] <- 2 * mu[(i - 1) * k + j] -
         quantile(foo$mu, 1 - (alpha / 2), names = FALSE)
@@ -347,11 +347,11 @@ mvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
       tj <- tvect[j]
       if (i == m & j == t) {
         foo <- bootstrap_sigma %>%
-          filter((row_number() %% (m * k * k)) == 0)
+          dplyr::filter((row_number() %% (m * k * k)) == 0)
       }
       else {
         foo <- bootstrap_sigma %>%
-          filter((row_number() %% (m * k * k)) == (i - 1) * k * k + tj)
+          dplyr::filter((row_number() %% (m * k * k)) == (i - 1) * k * k + tj)
       }
       sigma_lower[i, j] <- 2 * sigma[(i - 1) * k * k + tj] -
         quantile(foo$sigma, 1 - (alpha / 2), names = FALSE)
@@ -367,11 +367,11 @@ mvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
   for (i in 1:(m * m)) {
     if (i == (m * m)) {
       foo <- bootstrap_gamma %>%
-        filter((row_number() %% (m * m)) == 0)
+        dplyr::filter((row_number() %% (m * m)) == 0)
     }
     else {
       foo <- bootstrap_gamma %>%
-        filter((row_number() %% (m * m)) == i)
+        dplyr::filter((row_number() %% (m * m)) == i)
     }
     gamma_lower[i] <- 2 * gamma[i] -
       quantile(foo$gamma, 1 - (alpha / 2), names = FALSE)
@@ -385,10 +385,10 @@ mvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
   delta <- mod$delta
   for (i in 1:m) {
     if (i == m) {
-      foo <- bootstrap_delta %>% filter((row_number() %% m) == 0)
+      foo <- bootstrap_delta %>% dplyr::filter((row_number() %% m) == 0)
     }
     else {
-      foo <- bootstrap_delta %>% filter((row_number() %% m) == i)
+      foo <- bootstrap_delta %>% dplyr::filter((row_number() %% m) == i)
     }
     delta_lower[i] <- 2 * delta[i] -
       quantile(foo$delta, 1 - (alpha / 2), names = FALSE)

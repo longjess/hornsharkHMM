@@ -163,7 +163,7 @@ mvnorm_hmm_viterbi <- function(x, mod) {
   for (t in (n - 1):1) {
     iv[t] <- which.max(mod$gamma[, iv[t + 1]] * xi[t, ])
   }
-  return(data_frame(index = 1:n, states = iv))
+  return(data_frame(index = 1:n, state = iv))
 }
 
 mvnorm_hmm_lforward <- function(x, mod) {

@@ -1,5 +1,3 @@
-#' @param mat
-#'
 #' @import bayesforecast
 #' @import chron
 #' @import dplyr

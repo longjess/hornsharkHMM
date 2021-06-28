@@ -146,6 +146,7 @@ behavior_plot <- function(data, filename) {
   ggsave(paste(filename, "ODBA.png", sep = "_"), plot_odba)
 }
 
+#filter issue
 filtered_hist <- function(data, filename) {
   plotx <- ggplot(data,
                   aes(x = X_dynamic, colour = Behavior, fill = Behavior)) +
@@ -182,7 +183,7 @@ filtered_hist <- function(data, filename) {
   behaviors <- unique(data$Behavior)
   for (i in seq_len(length(behaviors))) {
     behavior <- behaviors[i]
-    subdata <- data %>% filter(Behavior == behavior)
+    subdata <- data %>% dplyr::filter(Behavior == behavior)
 
     plotx <- ggplot(subdata, aes(x = X_dynamic)) +
       geom_histogram(colour = "dark red", fill = "salmon") +
@@ -202,6 +203,7 @@ filtered_hist <- function(data, filename) {
   }
 }
 
+#filter issue
 behavior_hist <- function(data, filename) {
   # Create new column indicating each subinterval of behavior
   n <- length(data$Behavior)
@@ -217,7 +219,7 @@ behavior_hist <- function(data, filename) {
   behaviors <- unique(data$Behavior)
   for (i in seq_len(length(behaviors))) {
     behavior <- behaviors[i]
-    subdata <- data %>% filter(Behavior == behavior)
+    subdata <- data %>% dplyr::filter(Behavior == behavior)
 
     plotx <- ggplot(data = subdata,
                     aes(x = X_dynamic,

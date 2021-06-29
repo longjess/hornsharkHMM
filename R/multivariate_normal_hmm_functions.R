@@ -159,7 +159,7 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
                                   stationary = stationary)
       h <- t(jacobian) %*% h %*% jacobian
       return(list(
-        m = m, mu = pn$mu, sigma = pn$sigma,
+        m = m, k = k, mu = pn$mu, sigma = pn$sigma,
         gamma = pn$gamma, delta = pn$delta,
         code = mod$code, mllk = mllk,
         aic = aic, bic = bic, invhessian = h
@@ -167,7 +167,7 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
     }
     else {
       return(list(
-        m = m, mu = pn$mu, sigma = pn$sigma,
+        m = m, k = k, mu = pn$mu, sigma = pn$sigma,
         gamma = pn$gamma, delta = pn$delta,
         code = mod$code, mllk = mllk,
         aic = aic, bic = bic, hessian = mod$hessian
@@ -176,7 +176,8 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
   }
   else {
     return(list(
-      m = m, mu = pn$mu, sigma = pn$sigma, gamma = pn$gamma, delta = pn$delta,
+      m = m, k = k, mu = pn$mu, sigma = pn$sigma,
+      gamma = pn$gamma, delta = pn$delta,
       code = mod$code, mllk = mllk, aic = aic, bic = bic
     ))
   }
@@ -262,21 +263,22 @@ mvnorm_hmm_lbackward <- function(x, mod) {
 
 # Normal pseudo-residuals for Normal HMM
 # Type can be "ordinary" or "forecast"
-mvnorm_hmm_pseudo_residuals <- function(x, mod, k, type) {
+mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
+  if (stationary) {
+    delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
+  }
+  else {
+    delta <- mod$delta
+  }
   if (type == "ordinary") {
     n <- ncol(x)
     la <- mvnorm_hmm_lforward(x, mod)
     lb <- mvnorm_hmm_lbackward(x, mod)
     lafact <- apply(la, 2, max)
     lbfact <- apply(lb, 2, max)
-
-    p <- matrix(NA, n, mod$m)
-    for (i in 1:n) {
-      p[i, ] <- mvnorm_dist(x[, i], mod, mod$m, k)
-    }
-
+    p <- mvnorm_dist_mat(x, mod)
     npsr <- rep(NA, n)
-    npsr[1] <- qnorm(mod$delta %*% p[1, ])
+    npsr[1] <- qnorm(delta %*% p[1, ])
     for (i in 2:n) {
       a <- exp(la[, i - 1] - lafact[i])
       b <- exp(lb[, i] - lbfact[i])
@@ -284,38 +286,33 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, k, type) {
       foo <- foo / sum(foo)
       npsr[i] <- qnorm(foo %*% p[i, ])
     }
-
     return(data_frame(npsr, index = c(1:n)))
   }
   else if (type == "forecast") {
     n <- ncol(x)
     la <- mvnorm_hmm_lforward(x, mod)
-
-    p <- matrix(NA, n, mod$m)
-    for (i in 1:n) {
-      p[i, ] <- mvnorm_dist(x[, i], mod, mod$m, k)
-    }
-
+    p <- mvnorm_dist_mat(x, mod)
     npsr <- rep(NA, n)
-    npsr[1] <- qnorm(mod$delta %*% p[1, ])
+    npsr[1] <- qnorm(delta %*% p[1, ])
     for (i in 2:n) {
       la_max <- max(la[, i - 1])
       a <- exp(la[, i - 1] - la_max)
       npsr[i] <- qnorm(t(a) %*% (gamma / sum(a)) %*% p[i, ])
     }
-
-    return(data_frame(npsr, x, index = c(1:n)))
+    return(data_frame(npsr, index = c(1:n)))
   }
 }
 
 # Get multivariate normal distribution given mod and x
-mvnorm_dist <- function(x, mod, m, k) {
-  pvect <- numeric(m)
-  for (i in 1:m) {
-    pvect[i] <- pmvnorm(lower = rep(-Inf, k), upper = x,
-                        mean = mod$mu[[i]], sigma = mod$sigma[[i]])
+mvnorm_dist_mat <- function(x, mod) {
+  p <- matrix(NA, n, mod$m)
+  for (i in 1:n) {
+    for (j in 1:m) {
+      p[i, j] <- pmvnorm(lower = rep(-Inf, mod$k), upper = x[, i],
+                         mean = mod$mu[[j]], sigma = mod$sigma[[j]])
+    }
   }
-  return(pvect)
+  return(p)
 }
 
 # Jacobian matrix for parameters

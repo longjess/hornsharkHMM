@@ -1,3 +1,18 @@
+library(tidyverse)
+library(ggplot2)
+library(ggfortify)
+library(plyr)
+library(mvtnorm)
+
+setwd("C:/Jessica/UofT Y4/Research/Coding")
+
+# Changes for multivariate normal
+# mu is a list of vectors
+# sigma is a list of matrices
+# parvect is a list
+# k is the number of variables
+
+# Transform normal natural parameters to working parameters
 mvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
                              delta = NULL, stationary = TRUE) {
   # Put all means into one vector
@@ -20,6 +35,28 @@ mvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
   return(parvect)
 }
 
+# Applies log to only diagonal elements of matrix,
+# then returns only lower triangular entries of matrix as vector
+# going down column by column
+diag_log_lower <- function(mat) {
+  diag(mat) <- log(diag(mat))
+  vect <- mat[lower.tri(mat, diag = TRUE)]
+  return(vect)
+}
+
+# Applies exp to only diagonal elements of matrix
+diag_exp <- function(mat) {
+  diag(mat) <- exp(diag(mat))
+  return(mat)
+}
+
+# Get nth triangular number (0 is 0th num)
+triangular_num <- function(n) {
+  nums <- choose(seq(n + 1), 2)
+  return(nums[n + 1])
+}
+
+# Transform normal working parameters to natural parameters
 mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
   # Change mu to list of vectors format
   mu <- list()
@@ -61,16 +98,17 @@ mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
   return(list(mu = mu, sigma = sigma, gamma = gamma, delta = delta))
 }
 
+# Computing minus the log-likelihood from the working parameters
 mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE, ...) {
-  n <- length(x)
+  n <- ncol(x)
   pn <- mvnorm_hmm_pw2pn(m, k, parvect, stationary = stationary)
-  p <- mvnorm_densities(x[[1]], pn, m)
+  p <- mvnorm_densities(x[, 1], pn, m)
   foo <- pn$delta * p
   sumfoo <- sum(foo)
   lscale <- log(sumfoo)
   foo <- foo / sumfoo
   for (i in 2:n) {
-    p <- mvnorm_densities(x[[i]], pn, m)
+    p <- mvnorm_densities(x[, i], pn, m)
     foo <- foo %*% pn$gamma * p
     sumfoo <- sum(foo)
     lscale <- lscale + log(sumfoo)
@@ -80,6 +118,16 @@ mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE, ...) {
   return(mllk)
 }
 
+# Get state dependent probability densities given x and mod
+mvnorm_densities <- function(x, mod, m) {
+  pvect <- numeric(m)
+  for (i in 1:m) {
+    pvect[i] <- dmvnorm(x, mod$mu[[i]], mod$sigma[[i]])
+  }
+  return(pvect)
+}
+
+# Computing MLE from natural parameters
 mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
                            stationary = TRUE, hessian = FALSE, ...) {
   parvect0 <- mvnorm_hmm_pn2pw(m = m, mu = mu0, sigma = sigma0,
@@ -93,8 +141,8 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
 
   np <- length(parvect0)
   aic <- 2 * (mllk + np)
-  n2 <- sum(!is.na(x))
-  bic <- 2 * mllk + np * log(n2)
+  n <- sum(!is.na(x))
+  bic <- 2 * mllk + np * log(n)
 
   if (hessian) {
     if (!stationary) {
@@ -134,6 +182,8 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
   }
 }
 
+# Generating a sample from normal distributions
+# x is a m x ns matrix
 mvnorm_hmm_generate_sample <- function(ns, mod) {
   mvect <- 1:mod$m
   state <- numeric(ns)
@@ -143,18 +193,24 @@ mvnorm_hmm_generate_sample <- function(ns, mod) {
       state[i] <- sample(mvect, 1, prob = mod$gamma[state[i - 1], ])
     }
   }
-  x <- lapply(state, mvnorm_hmm_sample_one, mod = mod)
+  x <- sapply(state, mvnorm_hmm_sample_one, mod = mod)
   return(list(index = c(1:ns), state = state, obs = x))
 }
 
+mvnorm_hmm_sample_one <- function(state, mod) {
+  x <- rmvnorm(1, mean = mod$mu[[state]], sigma = mod$sigma[[state]])
+  return(x)
+}
+
+# Global decoding by the Viterbi algorithm
 mvnorm_hmm_viterbi <- function(x, mod) {
-  n <- length(x)
+  n <- ncol(x)
   xi <- matrix(0, n, mod$m)
-  p <- mvnorm_densities(x[[1]], mod, mod$m)
+  p <- mvnorm_densities(x[, 1], mod, mod$m)
   foo <- mod$delta * p
   xi[1, ] <- foo / sum(foo)
   for (t in 2:n) {
-    p <- mvnorm_densities(x[[t]], mod, mod$m)
+    p <- mvnorm_densities(x[, t], mod, mod$m)
     foo <- apply(xi[t - 1, ] * mod$gamma, 2, max) * p
     xi[t, ] <- foo / sum(foo)
   }
@@ -166,16 +222,17 @@ mvnorm_hmm_viterbi <- function(x, mod) {
   return(data_frame(index = 1:n, state = iv))
 }
 
+# Computing log(forward probabilities) for normal distribution
 mvnorm_hmm_lforward <- function(x, mod) {
-  n <- length(x)
+  n <- ncol(x)
   lalpha <- matrix(NA, mod$m, n)
-  foo <- mod$delta * mvnorm_densities(x[[1]], mod, mod$m)
+  foo <- mod$delta * mvnorm_densities(x[, 1], mod, mod$m)
   sumfoo <- sum(foo)
   lscale <- log(sumfoo)
   foo <- foo / sumfoo
   lalpha[, 1] <- lscale + log(foo)
   for (i in 2:n) {
-    foo <- foo %*% mod$gamma * mvnorm_densities(x[[i]], mod, mod$m)
+    foo <- foo %*% mod$gamma * mvnorm_densities(x[, i], mod, mod$m)
     sumfoo <- sum(foo)
     lscale <- lscale + log(sumfoo)
     foo <- foo / sumfoo
@@ -184,15 +241,16 @@ mvnorm_hmm_lforward <- function(x, mod) {
   return(lalpha)
 }
 
+# Computing log(backward probabilities) for normal distribution
 mvnorm_hmm_lbackward <- function(x, mod) {
-  n <- length(x)
+  n <- ncol(x)
   m <- mod$m
   lbeta <- matrix(NA, m, n)
   lbeta[, n] <- rep(0, m)
   foo <- rep(1 / m, m)
   lscale <- log(m)
   for (i in (n - 1):1) {
-    foo <- mod$gamma %*% (mvnorm_densities(x[[i + 1]], mod, mod$m) * foo)
+    foo <- mod$gamma %*% (mvnorm_densities(x[, i + 1], mod, mod$m) * foo)
     lbeta[, i] <- log(foo) + lscale
     sumfoo <- sum(foo)
     foo <- foo / sumfoo
@@ -201,9 +259,12 @@ mvnorm_hmm_lbackward <- function(x, mod) {
   return(lbeta)
 }
 
+
+# Normal pseudo-residuals for Normal HMM
+# Type can be "ordinary" or "forecast"
 mvnorm_hmm_pseudo_residuals <- function(x, mod, k, type) {
   if (type == "ordinary") {
-    n <- length(x)
+    n <- ncol(x)
     la <- mvnorm_hmm_lforward(x, mod)
     lb <- mvnorm_hmm_lbackward(x, mod)
     lafact <- apply(la, 2, max)
@@ -211,7 +272,7 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, k, type) {
 
     p <- matrix(NA, n, mod$m)
     for (i in 1:n) {
-      p[i, ] <- mvnorm_dist(x[[i]][1, ], mod, mod$m, k)
+      p[i, ] <- mvnorm_dist(x[, i], mod, mod$m, k)
     }
 
     npsr <- rep(NA, n)
@@ -224,15 +285,15 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, k, type) {
       npsr[i] <- qnorm(foo %*% p[i, ])
     }
 
-    return(data_frame(npsr, x, index = c(1:n)))
+    return(data_frame(npsr, index = c(1:n)))
   }
   else if (type == "forecast") {
-    n <- length(x)
+    n <- ncol(x)
     la <- mvnorm_hmm_lforward(x, mod)
 
     p <- matrix(NA, n, mod$m)
     for (i in 1:n) {
-      p[i, ] <- mvnorm_dist(x[[i]][1, ], mod, mod$m, k)
+      p[i, ] <- mvnorm_dist(x[, i], mod, mod$m, k)
     }
 
     npsr <- rep(NA, n)
@@ -247,6 +308,7 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, k, type) {
   }
 }
 
+# Get multivariate normal distribution given mod and x
 mvnorm_dist <- function(x, mod, m, k) {
   pvect <- numeric(m)
   for (i in 1:m) {
@@ -256,6 +318,8 @@ mvnorm_dist <- function(x, mod, m, k) {
   return(pvect)
 }
 
+# Jacobian matrix for parameters
+# n should be total number of parameters estimated, excluding delta
 mvnorm_jacobian <- function(m, k, n, parvect, stationary = TRUE) {
   pn <- mvnorm_hmm_pw2pn(m, k, parvect, stationary)
   jacobian <- matrix(0, nrow = n, ncol = n)
@@ -290,6 +354,7 @@ mvnorm_jacobian <- function(m, k, n, parvect, stationary = TRUE) {
   return(jacobian)
 }
 
+# Bootstrapping estimates
 mvnorm_bootstrap_estimates <- function(mod, n, k, len, stationary) {
   m <- mod$m
   mu_estimate <- numeric(n * m * k)
@@ -403,3 +468,4 @@ mvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
     delta_lower = delta_lower, delta_upper = delta_upper
   ))
 }
+

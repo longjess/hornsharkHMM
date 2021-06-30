@@ -390,7 +390,7 @@ mar_bootstrap_estimates <- function(mod, n, len, stationary) {
     sigma_estimate[((i - 1) * m * k * k + 1):(i * m * k * k)] <-
       unlist(mod2$sigma, use.names = FALSE)
     gamma_estimate[((i - 1) * m * m + 1):(i * m * m)] <- mod2$gamma
-    gamma_estimate[((i - 1) * m * k * k * q + 1):(i * m * k * k * q)] <-
+    phi_estimate[((i - 1) * m * k * k * q + 1):(i * m * k * k * q)] <-
       unlist(mod2$phi, use.names = FALSE)
     delta_estimate[((i - 1) * m + 1):(i * m)] <- mod2$delta
   }
@@ -473,8 +473,8 @@ mar_bootstrap_ci <- function(mod, bootstrap, alpha) {
       quantile(foo$gamma, alpha / 2, names = FALSE)
   }
 
-  phi_lower <- mat(nrow = m * k, ncol = k * q)
-  phi_upper <- rep(NA, m * m)
+  phi_lower <- matrix(NA, nrow = m * k, ncol = k * q)
+  phi_upper <- matrix(NA, nrow = m * k, ncol = k * q)
   bootstrap_phi <- data_frame(phi = bootstrap$phi)
   phi <- unlist(mod$phi, use.names = FALSE)
   for (i in 1:(m * k * k * q)) {

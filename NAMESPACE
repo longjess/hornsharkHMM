@@ -2,6 +2,7 @@
 
 export(diag_exp)
 export(diag_log_lower)
+export(graph_hmm_hist)
 export(graph_hmm_output)
 export(triangular_num)
 import(Exponentiate)

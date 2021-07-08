@@ -2,16 +2,16 @@
 % Please edit documentation in R/graph_hmm.R
 \name{graph_hmm_output}
 \alias{graph_hmm_output}
-\title{Title}
+\title{Creates a line plot from data generated from univariate HMM}
 \usage{
 graph_hmm_output(output)
 }
 \arguments{
-\item{output}{}
+\item{output}{Dataframe with columns index, obs, state.}
 }
 \value{
-
+ggplot
 }
 \description{
-Title
+The plot is coloured by state.
 }

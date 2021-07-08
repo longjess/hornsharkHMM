@@ -1,3 +1,11 @@
+#' Title
+#'
+#' @param output
+#'
+#' @return
+#' @export
+#'
+#' @examples
 graph_hmm_output <- function(output) {
   ggplot(output, aes(x = index, y = obs, color = state)) +
     geom_line() +

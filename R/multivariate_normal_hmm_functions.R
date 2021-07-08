@@ -35,27 +35,6 @@ mvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
   return(parvect)
 }
 
-# Applies log to only diagonal elements of matrix,
-# then returns only lower triangular entries of matrix as vector
-# going down column by column
-diag_log_lower <- function(mat) {
-  diag(mat) <- log(diag(mat))
-  vect <- mat[lower.tri(mat, diag = TRUE)]
-  return(vect)
-}
-
-# Applies exp to only diagonal elements of matrix
-diag_exp <- function(mat) {
-  diag(mat) <- exp(diag(mat))
-  return(mat)
-}
-
-# Get nth triangular number (0 is 0th num)
-triangular_num <- function(n) {
-  nums <- choose(seq(n + 1), 2)
-  return(nums[n + 1])
-}
-
 # Transform normal working parameters to natural parameters
 mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
   # Change mu to list of vectors format

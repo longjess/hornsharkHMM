@@ -1,6 +1,23 @@
-norm_marginal <- function(start, end, n, mod) {
-  # Get stationary distribution
-  delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
+#' Get univariate normal marginal distribution
+#' from an HMM.
+#'
+#' @param start Smallest value in range.
+#' @param end Largest value in range.
+#' @param n
+#' @param mod List of HMM parameters
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Dataframe
+#' @export
+#'
+#' @examples
+norm_marginal <- function(start, end, n, mod, stationary) {
+  if (stationary){
+    delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
+  }
+  else{
+    delta <- mod$delta
+  }
   x <- seq(start, end, length.out = n)
   mnorm <- delta[1] * dnorm(x, mean = mod$mu[1], sd = mod$sigma[1])
   for (i in 2:mod$m) {
@@ -9,6 +26,22 @@ norm_marginal <- function(start, end, n, mod) {
   return(data_frame(x = x, mnorm = mnorm))
 }
 
+#' Transform normal natural parameters to working parameters
+#'
+#' @param m Number of states
+#' @param mu Vector of length m, containing means for each
+#' state dependent normal distribution
+#' @param sigma Vector of length m, containing standard
+#' deviations for each state dependent normal distribution
+#' @param gamma Transition probabiilty matrix, size m x m
+#' @param delta Optional, vector of length m containing
+#' initial distribution
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Vector of working parameters
+#' @export
+#'
+#' @examples
 norm_hmm_pn2pw <- function(m, mu, sigma, gamma,
                            delta = NULL, stationary = TRUE) {
   tsigma <- log(sigma)
@@ -24,10 +57,17 @@ norm_hmm_pn2pw <- function(m, mu, sigma, gamma,
   return(parvect)
 }
 
+#' Transform normal working parameters to natural parameters
+#'
+#' @param parvect Vector of working parameters
+#' @inheritParams norm_hmm_pn2pw
+#'
+#' @return List of natural parameters mu, sigma, gamma, delta
+#' @export
+#'
+#' @examples
 norm_hmm_pw2pn <- function(m, parvect, stationary = TRUE) {
-  # mu is untransformed
   mu <- parvect[1:m]
-  # Take exponent of tsigma
   sigma <- exp(parvect[(m + 1):(2 * m)])
   gamma <- diag(m)
   gamma[!gamma] <- exp(parvect[(2 * m + 1):(m + m * m)])
@@ -42,7 +82,16 @@ norm_hmm_pw2pn <- function(m, parvect, stationary = TRUE) {
   return(list(mu = mu, sigma = sigma, gamma = gamma, delta = delta))
 }
 
-norm_hmm_mllk <- function(parvect, x, m, stationary = TRUE, ...) {
+#' Get negative log-likelihood from the working parameters
+#'
+#' @param x Vector of observations
+#' @inheritParams norm_hmm_pn2pw
+#'
+#' @return Negative log-likelihood
+#' @export
+#'
+#' @examples
+norm_hmm_mllk <- function(parvect, x, m, stationary = TRUE) {
   if (m == 1) {
     return(-sum(dnorm(x, mean = parvect[1], sd = exp(parvect[2]), log = TRUE)))
   }
@@ -68,9 +117,24 @@ norm_hmm_mllk <- function(parvect, x, m, stationary = TRUE, ...) {
   return(mllk)
 }
 
+
+#' Maximum likelihood estimation of normal parameters
+#'
+#' @param mu0 Initial value for means
+#' @param sigma0 Initial value for standard deviations
+#' @param gamma0 Initial value for transition probability matrix
+#' @param delta0 Optional, initial value for
+#' initial distribution
+#' @param hessian Boolean, whether to return the inverse hessian
+#' @inheritParams norm_hmm_mllk
+#'
+#' @return List of results
+#' @export
+#'
+#' @examples
 norm_hmm_mle <- function(x, m, mu0, sigma0, gamma0,
                          delta0 = NULL, stationary = TRUE,
-                         hessian = FALSE, ...) {
+                         hessian = FALSE) {
   parvect0 <- norm_hmm_pn2pw(m, mu0, sigma0, gamma0, delta0,
                              stationary = stationary)
   mod <- nlm(norm_hmm_mllk, parvect0, x = x, m = m,
@@ -111,7 +175,7 @@ norm_hmm_mle <- function(x, m, mu0, sigma0, gamma0,
         m = m, mu = pn$mu, sigma = pn$sigma,
         gamma = pn$gamma, delta = pn$delta,
         code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, hessian = mod$hessian
+        aic = aic, bic = bic
       ))
     }
   }
@@ -123,6 +187,15 @@ norm_hmm_mle <- function(x, m, mu0, sigma0, gamma0,
   }
 }
 
+#' Generate sample from HMM with normal distribution
+#'
+#' @param ns Sample size
+#' @param mod List of HMM parameters
+#'
+#' @return Dataframe including index, state, obs
+#' @export
+#'
+#' @examples
 norm_hmm_generate_sample <- function(ns, mod) {
   mvect <- 1:mod$m
   state <- numeric(ns)
@@ -132,6 +205,15 @@ norm_hmm_generate_sample <- function(ns, mod) {
   return(data_frame(index = c(1:ns), state = state, obs = x))
 }
 
+#' Global decoding of states
+#'
+#' @param x Vector of observations
+#' @param mod List of HMM parameters
+#'
+#' @return Dataframe of decoded states and index
+#' @export
+#'
+#' @examples
 norm_hmm_viterbi <- function(x, mod) {
   n <- length(x)
   xi <- matrix(0, n, mod$m)
@@ -150,6 +232,14 @@ norm_hmm_viterbi <- function(x, mod) {
   return(data_frame(index = 1:n, state = iv))
 }
 
+#' Get forward probabilities
+#'
+#' @inheritParams norm_hmm_viterbi
+#'
+#' @return Matrix of forward probabilities
+#' @export
+#'
+#' @examples
 norm_hmm_lforward <- function(x, mod) {
   n <- length(x)
   lalpha <- matrix(NA, mod$m, n)
@@ -168,6 +258,14 @@ norm_hmm_lforward <- function(x, mod) {
   return(lalpha)
 }
 
+#' Get backward probabilities
+#'
+#' @inheritParams norm_hmm_viterbi
+#'
+#' @return Matrix of backward probabilities
+#' @export
+#'
+#' @examples
 norm_hmm_lbackward <- function(x, mod) {
   n <- length(x)
   m <- mod$m
@@ -185,6 +283,16 @@ norm_hmm_lbackward <- function(x, mod) {
   return(lbeta)
 }
 
+#' Generate pseudo residuals
+#'
+#' @inheritParams norm_hmm_viterbi
+#' @param type Type of pseudo-residual, either "ordinary" or "forecast"
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Dataframe of pseudo-residuals, observations, index
+#' @export
+#'
+#' @examples
 norm_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   if (stationary) {
     delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
@@ -237,6 +345,17 @@ norm_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   }
 }
 
+#' Get Jacobian matrix
+#'
+#' @param m Number of states
+#' @param n Total number of working parameters (excluding delta)
+#' @param parvect Vector of working parameters
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Jacobian matrix
+#' @export
+#'
+#' @examples
 norm_jacobian <- function(m, n, parvect, stationary = TRUE) {
   pn <- norm_hmm_pw2pn(m, parvect, stationary)
   jacobian <- matrix(0, nrow = n, ncol = n)
@@ -258,6 +377,17 @@ norm_jacobian <- function(m, n, parvect, stationary = TRUE) {
   return(jacobian)
 }
 
+#' Get bootstrapped estimates of parameters
+#'
+#' @param mod List of HMM parameters
+#' @param n Number of bootstrap samples
+#' @param len Number of observations
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return List of estimates
+#' @export
+#'
+#' @examples
 norm_bootstrap_estimates <- function(mod, n, len, stationary) {
   m <- mod$m
   mu_estimate <- numeric(n * m)
@@ -277,6 +407,16 @@ norm_bootstrap_estimates <- function(mod, n, len, stationary) {
               gamma = gamma_estimate, delta = delta_estimate))
 }
 
+#' Estimate covariance matrix of parameters from bootstrap estimates
+#'
+#' @param bootstrap List of bootstrap estimates of parameters
+#' @param m Number of states
+#' @param n Number of bootstrap samples
+#'
+#' @return Estimate of covariance matrix of parameters
+#' @export
+#'
+#' @examples
 norm_bootstrap_covariance <- function(bootstrap, m, n) {
   size <- (m + 3) * m
   cov <- matrix(rep(0, size * size), size)
@@ -300,6 +440,17 @@ norm_bootstrap_covariance <- function(bootstrap, m, n) {
   return(cov)
 }
 
+#' Confidence intervals for estimated parameters by bootstrapping
+#'
+#' @param mod Maximum likelihood estimates of parameters
+#' @param alpha Confidence level
+#' @inheritParams norm_bootstrap_covariance
+#'
+#' @return List of lower and upper bounds for confidence intervals
+#' for each parameter
+#' @export
+#'
+#' @examples
 norm_bootstrap_ci <- function(mod, bootstrap, alpha, m) {
   mu_lower <- rep(NA, m)
   mu_upper <- rep(NA, m)

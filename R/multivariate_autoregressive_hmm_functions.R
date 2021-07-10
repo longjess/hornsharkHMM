@@ -178,36 +178,12 @@ mar_hmm_mle <- function(x, m, q, k, mu0, sigma0, gamma0, phi0, delta0 = NULL,
   bic <- 2 * mllk + np * log(n)
 
   if (hessian) {
-    if (!stationary) {
-      np2 <- np - m + 1
-      h <- mod$hessian[1:np2, 1:np2]
-    }
-    else {
-      np2 <- np
-      h <- mod$hessian
-    }
-    if (det(h) != 0) {
-      h <- solve(h)
-      jacobian <- mar_jacobian(m, k,
-                               n = np2, mod$estimate,
-                               stationary = stationary
-      )
-      h <- t(jacobian) %*% h %*% jacobian
-      return(list(
-        m = m, q = q, k = k, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, phi = pn$phi, delta = pn$delta,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, invhessian = h
-      ))
-    }
-    else {
-      return(list(
-        m = m, q = q, k = k, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, phi = pn$phi, delta = pn$delta,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, hessian = mod$hessian
-      ))
-    }
+    return(list(
+      m = m, q = q, k = k, mu = pn$mu, sigma = pn$sigma,
+      gamma = pn$gamma, phi = pn$phi, delta = pn$delta,
+      code = mod$code, mllk = mllk,
+      aic = aic, bic = bic, hessian = mod$hessian, np = np
+    ))
   }
   else {
     return(list(
@@ -331,15 +307,33 @@ mar_dist_mat <- function(x, mod, n) {
   return(p)
 }
 
-mar_jacobian <- function(m, q, k, n, parvect, stationary = TRUE) {
-  pn <- mar_hmm_pw2pn(m, q, k, parvect, stationary)
+mar_inv_hessian <- function(mod, stationary = TRUE){
+  if (!stationary) {
+    np2 <- mod$np - mod$m + 1
+    h <- mod$hessian[1:np2, 1:np2]
+  }
+  else {
+    np2 <- mod$np
+    h <- mod$hessian
+  }
+  h <- solve(h)
+  jacobian <- norm_jacobian(mod, np2)
+  h <- t(jacobian) %*% h %*% jacobian
+  return(h)
+}
+
+mar_jacobian <- function(mod, n) {
+  m <- mod$m
+  q <- mod$q
+  k <- mod$k
+
   jacobian <- matrix(0, nrow = n, ncol = n)
   jacobian[1:(m * k), 1:(m * k)] <- diag(m * k)
 
   rowcount <- m * k + 1
   t <- triangular_num(k)
   for (i in 1:m) {
-    sigma <- pn$sigma[[i]]
+    sigma <- mod$sigma[[i]]
     sigma[lower.tri(sigma, diag = FALSE)] <-
       rep(1, length(sigma[lower.tri(sigma, diag = FALSE)]))
     sigma <- sigma[lower.tri(sigma, diag = TRUE)]
@@ -354,8 +348,8 @@ mar_jacobian <- function(m, q, k, n, parvect, stationary = TRUE) {
   for (i in 1:m) {
     for (j in 1:m) {
       if (j != i) {
-        foo <- -pn$gamma[i, j] * pn$gamma[i, ]
-        foo[j] <- pn$gamma[i, j] * (1 - pn$gamma[i, j])
+        foo <- -mod$gamma[i, j] * mod$gamma[i, ]
+        foo[j] <- mod$gamma[i, j] * (1 - mod$gamma[i, j])
         foo <- foo[-i]
         jacobian[rowcount, colcount:(colcount + m - 2)] <- foo
         rowcount <- rowcount + 1
@@ -364,12 +358,11 @@ mar_jacobian <- function(m, q, k, n, parvect, stationary = TRUE) {
     colcount <- colcount + m - 1
   }
 
-  phi <- unlist(pn$phi, use.names = FALSE)
+  phi <- unlist(mod$phi, use.names = FALSE)
   jacobian[rowcount:n, colcount:n] <- diag(phi)
 
   return(jacobian)
 }
-
 mar_bootstrap_estimates <- function(mod, n, len, stationary) {
   m <- mod$m
   k <- mod$k

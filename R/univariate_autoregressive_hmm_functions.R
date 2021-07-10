@@ -127,35 +127,12 @@ ar_hmm_mle <- function(x, m, q, mu0, sigma0, gamma0, phi0,
   bic <- 2 * mllk + np * log(n)
 
   if (hessian) {
-    if (!stationary) {
-      np2 <- np - m + 1
-      h <- mod$hessian[1:np2, 1:np2]
-    }
-    else {
-      np2 <- np
-      h <- mod$hessian
-    }
-    if (det(h) != 0) {
-      h <- solve(h)
-      jacobian <- ar_jacobian(m, q, np2, mod$estimate,
-                              stationary = stationary
-      )
-      h <- t(jacobian) %*% h %*% jacobian
-      return(list(
-        m = m, q = q, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, delta = pn$delta, phi = pn$phi,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, invhessian = h
-      ))
-    }
-    else {
-      return(list(
-        m = m, q = q, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, delta = pn$delta, phi = pn$phi,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, hessian = mod$hessian
-      ))
-    }
+    return(list(
+      m = m, q = q, mu = pn$mu, sigma = pn$sigma,
+      gamma = pn$gamma, delta = pn$delta, phi = pn$phi,
+      code = mod$code, mllk = mllk,
+      aic = aic, bic = bic, hessian = mod$hessian, np = np
+    ))
   }
   else {
     return(list(
@@ -291,18 +268,34 @@ ar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   }
 }
 
-ar_jacobian <- function(m, q, n, parvect, stationary = TRUE) {
-  pn <- ar_hmm_pw2pn(m, q, parvect, stationary)
+ar_inv_hessian <- function(mod, stationary = TRUE){
+  if (!stationary) {
+    np2 <- mod$np - mod$m + 1
+    h <- mod$hessian[1:np2, 1:np2]
+  }
+  else {
+    np2 <- mod$np
+    h <- mod$hessian
+  }
+  h <- solve(h)
+  jacobian <- norm_jacobian(mod, np2)
+  h <- t(jacobian) %*% h %*% jacobian
+  return(h)
+}
+
+ar_jacobian <- function(mod, np2) {
+  m <- mod$m
+  q <- mod$q
   jacobian <- matrix(0, nrow = n, ncol = n)
   jacobian[1:m, 1:m] <- diag(m)
-  jacobian[(m + 1):(2 * m), (m + 1):(2 * m)] <- diag(pn$sigma)
+  jacobian[(m + 1):(2 * m), (m + 1):(2 * m)] <- diag(mod$sigma)
   count <- 0
   for (i in 1:m) {
     for (j in 1:m) {
       if (j != i) {
         count <- count + 1
-        foo <- -pn$gamma[i, j] * pn$gamma[i, ]
-        foo[j] <- pn$gamma[i, j] * (1 - pn$gamma[i, j])
+        foo <- -mod$gamma[i, j] * mod$gamma[i, ]
+        foo[j] <- mod$gamma[i, j] * (1 - mod$gamma[i, j])
         foo <- foo[-i]
         jacobian[
           2 * m + count,
@@ -312,7 +305,7 @@ ar_jacobian <- function(m, q, n, parvect, stationary = TRUE) {
     }
   }
   count <- 2 * m + count + 1
-  phi <- unlist(pn$phi, use.names = FALSE)
+  phi <- unlist(mod$phi, use.names = FALSE)
   jacobian[count:n, count:n] <- diag(phi)
   return(jacobian)
 }

@@ -134,34 +134,12 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
   bic <- 2 * mllk + np * log(n)
 
   if (hessian) {
-    if (!stationary) {
-      np2 <- np - m + 1
-      h <- mod$hessian[1:np2, 1:np2]
-    }
-    else {
-      np2 <- np
-      h <- mod$hessian
-    }
-    if (det(h) != 0) {
-      h <- solve(h)
-      jacobian <- mvnorm_jacobian(m, k, n = np2, mod$estimate,
-                                  stationary = stationary)
-      h <- t(jacobian) %*% h %*% jacobian
-      return(list(
-        m = m, k = k, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, delta = pn$delta,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, invhessian = h
-      ))
-    }
-    else {
-      return(list(
-        m = m, k = k, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, delta = pn$delta,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, hessian = mod$hessian
-      ))
-    }
+    return(list(
+      m = m, k = k, mu = pn$mu, sigma = pn$sigma,
+      gamma = pn$gamma, delta = pn$delta,
+      code = mod$code, mllk = mllk,
+      aic = aic, bic = bic, hessian = mod$hessian, np = np
+    ))
   }
   else {
     return(list(
@@ -286,7 +264,7 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
     for (i in 2:n) {
       la_max <- max(la[, i - 1])
       a <- exp(la[, i - 1] - la_max)
-      npsr[i] <- qnorm(t(a) %*% (gamma / sum(a)) %*% p[i, ])
+      npsr[i] <- qnorm(t(a) %*% (mod$gamma / sum(a)) %*% p[i, ])
     }
     return(data_frame(npsr, index = c(1:n)))
   }
@@ -304,10 +282,27 @@ mvnorm_dist_mat <- function(x, mod) {
   return(p)
 }
 
+mvnorm_inv_hessian <- function(mod, stationary = TRUE){
+  if (!stationary) {
+    np2 <- mod$np - mod$m + 1
+    h <- mod$hessian[1:np2, 1:np2]
+  }
+  else {
+    np2 <- mod$np
+    h <- mod$hessian
+  }
+  h <- solve(h)
+  jacobian <- norm_jacobian(mod, np2)
+  h <- t(jacobian) %*% h %*% jacobian
+  return(h)
+}
+
+
 # Jacobian matrix for parameters
 # n should be total number of parameters estimated, excluding delta
-mvnorm_jacobian <- function(m, k, n, parvect, stationary = TRUE) {
-  pn <- mvnorm_hmm_pw2pn(m, k, parvect, stationary)
+mvnorm_jacobian <- function(mod, n) {
+  m <- mod$m
+  k <- mod$k
   jacobian <- matrix(0, nrow = n, ncol = n)
   # Jacobian for mu only is a m*k identity matrix
   jacobian[1:(m * k), 1:(m * k)] <- diag(m * k)
@@ -316,20 +311,22 @@ mvnorm_jacobian <- function(m, k, n, parvect, stationary = TRUE) {
   # There are t*m sigma parameters
   t <- triangular_num(k)
   for (i in 1:m) {
-    sigma <- pn$sigma[[i]]
+    sigma <- mod$sigma[[i]]
     sigma[lower.tri(sigma, diag = FALSE)] <-
       rep(1, length(sigma[lower.tri(sigma, diag = FALSE)]))
     sigma <- sigma[lower.tri(sigma, diag = TRUE)]
-    jacobian[rowcount:(rowcount + t - 1),
-             rowcount:(rowcount + t - 1)] <- diag(sigma)
+    jacobian[
+      rowcount:(rowcount + t - 1),
+      rowcount:(rowcount + t - 1)
+      ] <- diag(sigma)
     rowcount <- rowcount + t
   }
   colcount <- rowcount
   for (i in 1:m) {
     for (j in 1:m) {
       if (j != i) {
-        foo <- -pn$gamma[i, j] * pn$gamma[i, ]
-        foo[j] <- pn$gamma[i, j] * (1 - pn$gamma[i, j])
+        foo <- -mod$gamma[i, j] * mod$gamma[i, ]
+        foo[j] <- mod$gamma[i, j] * (1 - mod$gamma[i, j])
         foo <- foo[-i]
         jacobian[rowcount, colcount:(colcount + m - 2)] <- foo
         rowcount <- rowcount + 1
@@ -339,6 +336,7 @@ mvnorm_jacobian <- function(m, k, n, parvect, stationary = TRUE) {
   }
   return(jacobian)
 }
+
 
 # Bootstrapping estimates
 mvnorm_bootstrap_estimates <- function(mod, n, k, len, stationary) {

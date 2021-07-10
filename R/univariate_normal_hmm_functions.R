@@ -150,34 +150,12 @@ norm_hmm_mle <- function(x, m, mu0, sigma0, gamma0,
   bic <- 2 * mllk + np * log(n)
 
   if (hessian) {
-    if (!stationary) {
-      np2 <- np - m + 1
-      h <- mod$hessian[1:np2, 1:np2]
-    }
-    else {
-      np2 <- np
-      h <- mod$hessian
-    }
-    if (det(h) != 0) {
-      h <- solve(h)
-      jacobian <- norm_jacobian(m, np2, mod$estimate,
-                                stationary = stationary)
-      h <- t(jacobian) %*% h %*% jacobian
-      return(list(
-        m = m, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, delta = pn$delta,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic, invhessian = h
-      ))
-    }
-    else {
-      return(list(
-        m = m, mu = pn$mu, sigma = pn$sigma,
-        gamma = pn$gamma, delta = pn$delta,
-        code = mod$code, mllk = mllk,
-        aic = aic, bic = bic
-      ))
-    }
+    return(list(
+      m = m, mu = pn$mu, sigma = pn$sigma,
+      gamma = pn$gamma, delta = pn$delta,
+      code = mod$code, mllk = mllk,
+      aic = aic, bic = bic, hessian = mod$hessian, np = np
+    ))
   }
   else {
     return(list(
@@ -345,29 +323,33 @@ norm_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   }
 }
 
-#' Get Jacobian matrix
-#'
-#' @param m Number of states
-#' @param n Total number of working parameters (excluding delta)
-#' @param parvect Vector of working parameters
-#' @param stationary Boolean, whether the HMM is stationary or not
-#'
-#' @return Jacobian matrix
-#' @export
-#'
-#' @examples
-norm_jacobian <- function(m, n, parvect, stationary = TRUE) {
-  pn <- norm_hmm_pw2pn(m, parvect, stationary)
+norm_inv_hessian <- function(mod, stationary = TRUE){
+  if (!stationary) {
+    np2 <- mod$np - mod$m + 1
+    h <- mod$hessian[1:np2, 1:np2]
+  }
+  else {
+    np2 <- mod$np
+    h <- mod$hessian
+  }
+  h <- solve(h)
+  jacobian <- norm_jacobian(mod, np2)
+  h <- t(jacobian) %*% h %*% jacobian
+  return(h)
+}
+
+norm_jacobian <- function(mod, n) {
+  m <- mod$m
   jacobian <- matrix(0, nrow = n, ncol = n)
   jacobian[1:m, 1:m] <- diag(m)
-  jacobian[(m + 1):(2 * m), (m + 1):(2 * m)] <- diag(pn$sigma)
+  jacobian[(m + 1):(2 * m), (m + 1):(2 * m)] <- diag(mod$sigma)
   count <- 0
   for (i in 1:m) {
     for (j in 1:m) {
       if (j != i) {
         count <- count + 1
-        foo <- -pn$gamma[i, j] * pn$gamma[i, ]
-        foo[j] <- pn$gamma[i, j] * (1 - pn$gamma[i, j])
+        foo <- -mod$gamma[i, j] * mod$gamma[i, ]
+        foo[j] <- mod$gamma[i, j] * (1 - mod$gamma[i, j])
         foo <- foo[-i]
         jacobian[2 * m + count,
                  (2 * m + (i - 1) * (m - 1) + 1):(2 * m + i * (m - 1))] <- foo

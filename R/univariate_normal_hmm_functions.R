@@ -28,6 +28,8 @@ norm_marginal <- function(start, end, n, mod, stationary) {
 
 #' Transform normal natural parameters to working parameters
 #'
+#' mu does not need to be transformed, as there are no constraints.
+#'
 #' @param m Number of states
 #' @param mu Vector of length m, containing means for each
 #' state dependent normal distribution
@@ -323,6 +325,21 @@ norm_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   }
 }
 
+#' Get inverse of hessian matrix
+#'
+#' Transform hessian associated with working parameters
+#' outputted by nlm.
+#' If not stationary, exclude values associated with delta parameter
+#' from the hessian matrix.
+#'
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Inverse hessian matrix
+#' @export
+#'
+#' @examples
 norm_inv_hessian <- function(mod, stationary = TRUE){
   if (!stationary) {
     np2 <- mod$np - mod$m + 1
@@ -338,6 +355,17 @@ norm_inv_hessian <- function(mod, stationary = TRUE){
   return(h)
 }
 
+#' Get Jacobian matrix
+#'
+#' @param m Number of states
+#' @param n Total number of working parameters (excluding delta)
+#' @param parvect Vector of working parameters
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Jacobian matrix
+#' @export
+#'
+#' @examples
 norm_jacobian <- function(mod, n) {
   m <- mod$m
   jacobian <- matrix(0, nrow = n, ncol = n)

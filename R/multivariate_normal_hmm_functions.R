@@ -1,5 +1,11 @@
 #' Transform multivariate normal natural parameters to working parameters
 #'
+#' mu does not need to be transformed, as there are no constraints.
+#' We only need to transform diagonal elements of sigma, since there
+#' are no constraints on the covariances.
+#' Include only the lower triangular and diagional elementrs
+#' of the sigma matrix, since covariance matrices must be symmetric.
+#'
 #' @param m Number of states
 #' @param mu List of vectors of length m, means for each
 #' state dependent multivariate normal distribution
@@ -16,11 +22,7 @@
 #' @examples
 mvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
                              delta = NULL, stationary = TRUE) {
-  # Put all means into one vector
   mu <- unlist(mu, use.names = FALSE)
-  # Only need to transform diagonal elements of sigma
-  # Include only lower triangle & diag of matrix,
-  # since covariance matrix must be symmetric
   tsigma <- lapply(sigma, diag_log_lower)
   tsigma <- unlist(tsigma, use.names = FALSE)
   foo <- log(gamma / diag(gamma))
@@ -36,18 +38,16 @@ mvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
 }
 
 #' Transform multivariate normal working parameters to natural parameters
-#' Title
 #'
 #' @param k Number of variables
 #' @param parvect Vector of working parameters
 #' @inheritParams mvnorm_hmm_pn2pw
 #'
-#' @return
+#' @return List of natural parameters
 #' @export
 #'
 #' @examples
 mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
-  # Change mu to list of vectors format
   mu <- list()
   count <- 1
   for (i in 1:m) {
@@ -55,9 +55,7 @@ mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
     count <- count + k
   }
 
-  # Change sigma to list of matrices format
   tsigma <- list()
-  # Get number of elements in lower triangle (including diag) of matrix
   t <- triangular_num(k)
   for (i in 1:m) {
     tsigma_vals <- parvect[count:(count + t - 1)]
@@ -87,8 +85,16 @@ mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
   return(list(mu = mu, sigma = sigma, gamma = gamma, delta = delta))
 }
 
-# Computing minus the log-likelihood from the working parameters
-mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE, ...) {
+#' Get negative log-likelihood from the working parameters
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @inheritParams mvnorm_hmm_pw2pn
+#'
+#' @return Negative log-likelihood
+#' @export
+#'
+#' @examples
+mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
   n <- ncol(x)
   pn <- mvnorm_hmm_pw2pn(m, k, parvect, stationary = stationary)
   p <- mvnorm_densities(x[, 1], pn, m)
@@ -108,6 +114,15 @@ mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE, ...) {
 }
 
 # Get state dependent probability densities given x and mod
+#'
+#' @param x Vector containing one observation
+#' @param mod List of parameters
+#' @param m Number of states
+#'
+#' @return Vector of state dependent probability densities
+#' @export
+#'
+#' @examples
 mvnorm_densities <- function(x, mod, m) {
   pvect <- numeric(m)
   for (i in 1:m) {
@@ -116,9 +131,26 @@ mvnorm_densities <- function(x, mod, m) {
   return(pvect)
 }
 
-# Computing MLE from natural parameters
+#' Maximum likelihood estimation of normal parameters
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @param m Number of states
+#' @param k Number of variables
+#' @param mu0 List of vectors of length m, initial values for means
+#' @param sigma0 List of matrices of size m x m,
+#' initial values for covariance matrices
+#' @param gamma0 Initial values for ransition probabiilty matrix, size m x m
+#' @param delta0 Optional, vector of length m containing initial values
+#' initial distribution
+#' @param stationary Boolean, whether the HMM is stationary or not
+#' @param hessian Boolean, whether to return the inverse hessian
+#'
+#' @return List of results
+#' @export
+#'
+#' @examples
 mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
-                           stationary = TRUE, hessian = FALSE, ...) {
+                           stationary = TRUE, hessian = FALSE) {
   parvect0 <- mvnorm_hmm_pn2pw(m = m, mu = mu0, sigma = sigma0,
                                gamma = gamma0, delta = delta0,
                                stationary = stationary)
@@ -150,8 +182,16 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
   }
 }
 
-# Generating a sample from normal distributions
-# x is a m x ns matrix
+#'Generate samples from HMM with multivariate normal distribution
+#'
+#' @param ns Number of samples
+#' @param mod List of model parameters
+#'
+#' @return k x ns matrix containing generated samples,
+#' where k is the number of variables
+#' @export
+#'
+#' @examples
 mvnorm_hmm_generate_sample <- function(ns, mod) {
   mvect <- 1:mod$m
   state <- numeric(ns)
@@ -165,12 +205,29 @@ mvnorm_hmm_generate_sample <- function(ns, mod) {
   return(list(index = c(1:ns), state = state, obs = x))
 }
 
+#' Generate one sample from HMM with multivariate normal distribution
+#'
+#' @param state State the HMM is in
+#' @param mod List of parameters
+#'
+#' @return Vector containing generated sample
+#' @export
+#'
+#' @examples
 mvnorm_hmm_sample_one <- function(state, mod) {
   x <- rmvnorm(1, mean = mod$mu[[state]], sigma = mod$sigma[[state]])
   return(x)
 }
 
-# Global decoding by the Viterbi algorithm
+#' Global decoding of states
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @param mod List of parameters
+#'
+#' @return Dataframe of decoded states and index
+#' @export
+#'
+#' @examples
 mvnorm_hmm_viterbi <- function(x, mod) {
   n <- ncol(x)
   xi <- matrix(0, n, mod$m)

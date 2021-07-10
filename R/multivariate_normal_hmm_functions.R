@@ -1,18 +1,19 @@
-library(tidyverse)
-library(ggplot2)
-library(ggfortify)
-library(plyr)
-library(mvtnorm)
-
-setwd("C:/Jessica/UofT Y4/Research/Coding")
-
-# Changes for multivariate normal
-# mu is a list of vectors
-# sigma is a list of matrices
-# parvect is a list
-# k is the number of variables
-
-# Transform normal natural parameters to working parameters
+#' Transform multivariate normal natural parameters to working parameters
+#'
+#' @param m Number of states
+#' @param mu List of vectors of length m, means for each
+#' state dependent multivariate normal distribution
+#' @param sigma List of matrices of size m x m, covariance matrices
+#' for each state dependent multivariate normal distribution
+#' @param gamma Transition probabiilty matrix, size m x m
+#' @param delta Optional, vector of length m containing
+#' initial distribution
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Vector of working parameters
+#' @export
+#'
+#' @examples
 mvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
                              delta = NULL, stationary = TRUE) {
   # Put all means into one vector
@@ -30,12 +31,21 @@ mvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
   else {
     tdelta <- log(delta[-1] / delta[1])
   }
-  # parvect is one vector of values
   parvect <- c(mu, tsigma, tgamma, tdelta)
   return(parvect)
 }
 
-# Transform normal working parameters to natural parameters
+#' Transform multivariate normal working parameters to natural parameters
+#' Title
+#'
+#' @param k Number of variables
+#' @param parvect Vector of working parameters
+#' @inheritParams mvnorm_hmm_pn2pw
+#'
+#' @return
+#' @export
+#'
+#' @examples
 mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
   # Change mu to list of vectors format
   mu <- list()

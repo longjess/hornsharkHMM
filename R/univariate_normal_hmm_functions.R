@@ -120,10 +120,10 @@ norm_hmm_mllk <- function(parvect, x, m, stationary = TRUE) {
 
 #' Maximum likelihood estimation of normal parameters
 #'
-#' @param mu0 Initial value for means
-#' @param sigma0 Initial value for standard deviations
-#' @param gamma0 Initial value for transition probability matrix
-#' @param delta0 Optional, initial value for
+#' @param mu0 Vector of length m, initial value for means
+#' @param sigma0 Vector of length m, initial value for standard deviations
+#' @param gamma0 Matrix of size m x m, initial value for transition probability matrix
+#' @param delta0 Optional, vector of length m, initial value for
 #' initial distribution
 #' @param hessian Boolean, whether to return the inverse hessian
 #' @inheritParams norm_hmm_mllk

@@ -307,7 +307,7 @@ mar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
     for (i in 2:n) {
       la_max <- max(la[, i - 1])
       a <- exp(la[, i - 1] - la_max)
-      npsr[i] <- qnorm(t(a) %*% (gamma / sum(a)) %*% p[i, ])
+      npsr[i] <- qnorm(t(a) %*% (mod$gamma / sum(a)) %*% p[i, ])
     }
     return(data_frame(npsr, index = c(1:n)))
   }
@@ -321,7 +321,7 @@ mar_dist_mat <- function(x, mod, n) {
     mean <- get_mar_mean(mod$mu, mod$phi, x, mod$m, mod$q, mod$k, i)
     for (j in 1:mod$m) {
       p[i, j] <- pmvnorm(
-        lower = rep(-Inf, k),
+        lower = rep(-Inf, mod$k),
         upper = x[, i],
         mean = as.vector(mean[[j]]),
         sigma = mod$sigma[[j]]

@@ -1,8 +1,5 @@
-# q: order of autoregressive model
-# phi: autoregressive model parameters, as list of vectors
-
 # Get mean for given x in autoregressive series
-# phi is a qxq matrix
+# phi is a mxq matrix
 # i is the time index
 get_ar_mean <- function(mu, phi, x, q, i) {
   if (i == 1) {
@@ -22,6 +19,25 @@ get_ar_mean <- function(mu, phi, x, q, i) {
     mean <- mu + as.vector(phi %*% x_lag)
   }
   return(mean)
+}
+
+# Get all means for a given autoregressive series x
+get_all_ar_means <- function(mu, phi, m, q, x){
+  n <- length(x)
+  means <- matrix(mu, nrow = n, ncol = m, byrow = TRUE)
+
+  x_lags <- matrix(nrow = n, ncol = m)
+  for (i in 1:q){
+    x_lag <- lag(x, i)
+    x_lag[1:i] <- rep(0, i)
+    x_lags[, i] <- x_lag
+  }
+
+  for (i in 1:m){
+    means[, i] <- means[, i] + x_lags %*% phi[[i]]
+  }
+
+  return(means)
 }
 
 ar_hmm_generate_sample <- function(ns, mod) {
@@ -78,7 +94,7 @@ ar_hmm_pw2pn <- function(m, q, parvect, stationary = TRUE) {
   return(list(mu = mu, sigma = sigma, gamma = gamma, phi = phi, delta = delta))
 }
 
-ar_hmm_mllk <- function(parvect, x, m, q, stationary = TRUE, ...) {
+ar_hmm_mllk <- function(parvect, x, m, q, stationary = TRUE) {
   n <- length(x)
   pn <- ar_hmm_pw2pn(m, q, parvect, stationary = stationary)
   foo <- pn$delta * dnorm(x[1], pn$mu, pn$sigma)
@@ -86,11 +102,10 @@ ar_hmm_mllk <- function(parvect, x, m, q, stationary = TRUE, ...) {
   lscale <- log(sumfoo)
   foo <- foo / sumfoo
 
-  phi <- matrix(unlist(pn$phi, use.names = FALSE), nrow = q, byrow = TRUE)
+  means <- get_all_ar_means(pn$mu, pn$phi, m, q, x)
   for (i in 2:n) {
     if (!is.na(x[i])) {
-      mean <- get_ar_mean(pn$mu, phi, x, q, i)
-      p <- dnorm(x[i], mean, pn$sigma)
+      p <- dnorm(x[i], means[i, ], pn$sigma)
     }
     else {
       p <- rep(1, m)
@@ -149,10 +164,9 @@ ar_hmm_viterbi <- function(x, mod) {
   foo <- mod$delta * dnorm(x[1], mod$mu, mod$sigma)
   xi[1, ] <- foo / sum(foo)
 
-  phi <- matrix(unlist(mod$phi, use.names = FALSE), nrow = mod$q, byrow = TRUE)
+  means <- get_all_ar_means(mod$mu, mod$phi, mod$m, mod$q, x)
   for (t in 2:n) {
-    mean <- get_ar_mean(mod$mu, phi, x, mod$q, t)
-    p <- dnorm(x[t], mean = mean, sd = mod$sigma)
+    p <- dnorm(x[t], mean = means[t, ], sd = mod$sigma)
     foo <- apply(xi[t - 1, ] * mod$gamma, 2, max) * p
     xi[t, ] <- foo / sum(foo)
   }
@@ -174,10 +188,9 @@ ar_hmm_lforward <- function(x, mod) {
   foo <- foo / sumfoo
   lalpha[, 1] <- lscale + log(foo)
 
-  phi <- matrix(unlist(mod$phi, use.names = FALSE), nrow = mod$q, byrow = TRUE)
+  means <- get_all_ar_means(mod$mu, mod$phi, mod$m, mod$q, x)
   for (i in 2:n) {
-    mean <- get_ar_mean(mod$mu, phi, x, mod$q, i)
-    p <- dnorm(x[i], mean = mean, sd = mod$sigma)
+    p <- dnorm(x[i], mean = means[i, ], sd = mod$sigma)
     foo <- foo %*% mod$gamma * p
     sumfoo <- sum(foo)
     lscale <- lscale + log(sumfoo)
@@ -196,10 +209,9 @@ ar_hmm_lbackward <- function(x, mod) {
   foo <- rep(1 / m, m)
   lscale <- log(m)
 
-  phi <- matrix(unlist(mod$phi, use.names = FALSE), nrow = mod$q, byrow = TRUE)
+  means <- get_all_ar_means(mod$mu, mod$phi, mod$m, mod$q, x)
   for (i in (n - 1):1) {
-    mean <- get_ar_mean(mod$mu, phi, x, mod$q, i + 1)
-    p <- dnorm(x[i + 1], mean = mean, sd = mod$sigma)
+    p <- dnorm(x[i + 1], mean = means[i + 1, ], sd = mod$sigma)
     foo <- mod$gamma %*% (p * foo)
     lbeta[, i] <- log(foo) + lscale
     sumfoo <- sum(foo)
@@ -224,12 +236,10 @@ ar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
     lafact <- apply(la, 2, max)
     lbfact <- apply(lb, 2, max)
 
-    phi <- matrix(unlist(mod$phi, use.names = FALSE),
-                  nrow = mod$q, byrow = TRUE)
+    means <- get_all_ar_means(mod$mu, mod$phi, mod$m, mod$q, x)
     p <- matrix(NA, n, mod$m)
     for (i in 1:n) {
-      mean <- get_ar_mean(mod$mu, phi, x, mod$q, i)
-      p[i, ] <- pnorm(x[i], mean = mean, sd = mod$sigma)
+      p[i, ] <- pnorm(x[i], mean = means[i, ], sd = mod$sigma)
     }
 
     npsr <- rep(NA, n)
@@ -248,12 +258,10 @@ ar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
     n <- length(x)
     la <- ar_hmm_lforward(x, mod)
 
-    phi <- matrix(unlist(mod$phi, use.names = FALSE),
-                  nrow = mod$q, byrow = TRUE)
+    means <- get_all_ar_means(mod$mu, mod$phi, mod$m, mod$q, x)
     p <- matrix(NA, n, mod$m)
     for (i in 1:n) {
-      mean <- get_ar_mean(mod$mu, phi, x, mod$q, i)
-      p[i, ] <- pnorm(x[i], mean = mean, sd = mod$sigma)
+      p[i, ] <- pnorm(x[i], mean = means[i, ], sd = mod$sigma)
     }
 
     npsr <- rep(NA, n)

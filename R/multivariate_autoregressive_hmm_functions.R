@@ -9,20 +9,18 @@ get_mar_mean <- function(mu, phi, x, m, q, k, i) {
     mean <- mu
   }
   else {
+    mean <- list()
     if (i <= q) {
-      n <- i - 1
+      x_lag <- as.vector(x[, (i - 1):1])
+      for (j in 1:m) {
+        mean[[j]] <- mu[[j]] + phi[[j]][, 1:((i - 1) * k)] %*% x_lag
+      }
     }
     else {
-      n <- q
-    }
-    mean <- list()
-    for (j in 1:m) {
-      foo <- mu[[j]]
-      for (h in 1:n) {
-        x_lag <- x[, i - h]
-        foo <- foo + phi[[j]][, ((h - 1) * k + 1):(h * k)] %*% x_lag
+      x_lag <- as.vector(x[, (i - 1):(i - q)])
+      for (j in 1:m) {
+        mean[[j]] <- mu[[j]] + phi[[j]] %*% x_lag
       }
-      mean[[j]] <- foo
     }
   }
   return(mean)

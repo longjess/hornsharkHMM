@@ -4,12 +4,12 @@
 \alias{norm_jacobian}
 \title{Get Jacobian matrix}
 \usage{
-norm_jacobian(m, n, parvect, stationary = TRUE)
+norm_jacobian(mod, n)
 }
 \arguments{
-\item{m}{Number of states}
-
 \item{n}{Total number of working parameters (excluding delta)}
+
+\item{m}{Number of states}
 
 \item{parvect}{Vector of working parameters}
 

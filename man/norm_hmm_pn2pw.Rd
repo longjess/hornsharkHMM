@@ -26,5 +26,5 @@ initial distribution}
 Vector of working parameters
 }
 \description{
-Transform normal natural parameters to working parameters
+mu does not need to be transformed, as there are no constraints.
 }

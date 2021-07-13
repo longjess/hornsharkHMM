@@ -31,6 +31,14 @@ graph_hmm_hist <- function(output) {
   return(plot)
 }
 
+#' Pseudo residual plots
+#'
+#' @param data Dataframe including index, npsr (normal pseudo-residuals)
+#'
+#' @return ggplot, including index plot, histogram, qq plot, acf plot
+#' @export
+#'
+#' @examples
 pseudo_residual_plot <- function(data) {
   # Index plot of pseudo-residuals
   plot_index <- ggplot(data) +

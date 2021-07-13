@@ -20,13 +20,13 @@ norm_hmm_mle(
 
 \item{m}{Number of states}
 
-\item{mu0}{Initial value for means}
+\item{mu0}{Vector of length m, initial value for means}
 
-\item{sigma0}{Initial value for standard deviations}
+\item{sigma0}{Vector of length m, initial value for standard deviations}
 
-\item{gamma0}{Initial value for transition probability matrix}
+\item{gamma0}{Matrix of size m x m, initial value for transition probability matrix}
 
-\item{delta0}{Optional, initial value for
+\item{delta0}{Optional, vector of length m, initial value for
 initial distribution}
 
 \item{stationary}{Boolean, whether the HMM is stationary or not}

@@ -26,6 +26,22 @@ get_mar_mean <- function(mu, phi, x, m, q, k, i) {
   return(mean)
 }
 
+get_all_mar_means <- function(x, mod, m, q, k) {
+  n <- ncol(x)
+  x_lags <- matrix(0, nrow = n, ncol = k * q)
+  for (i in 1:q){
+    x_lags[-c(1:i), ((i - 1) * k  + 1):(k * i)] <- t(x[, -c((n - i + 1):n)])
+  }
+
+  means <- list()
+  for(i in 1:m){
+    mu_matrix <- matrix(mod$mu[[i]], nrow = n, ncol = k, byrow = TRUE)
+    means[[i]] <- mu_matrix + x_lags %*% t(mod$phi[[i]])
+  }
+
+  return(means)
+}
+
 mar_hmm_generate_sample <- function(ns, mod) {
   mvect <- 1:mod$m
   state <- numeric(ns)
@@ -142,13 +158,12 @@ mar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE) {
 }
 
 # Returns n * m matrix of state dependent probability densities
-
 mar_densities <- function(x, mod, m, q, k, n) {
   p <- matrix(nrow = n, ncol = m)
+  means <- get_all_mar_means(x, mod, m, q, k)
   for (i in 1:n) {
-    mean <- get_mar_mean(mod$mu, mod$phi, x, m, q, k, i)
     for (j in 1:m) {
-      p[i, j] <- dmvnorm(x[, i], mean[[j]], mod$sigma[[j]])
+      p[i, j] <- dmvnorm(x[, i], means[[j]][i, ], mod$sigma[[j]])
     }
   }
   return(p)
@@ -162,7 +177,7 @@ mar_hmm_mle <- function(x, m, q, k, mu0, sigma0, gamma0, phi0, delta0 = NULL,
   )
   mod <- nlm(mar_hmm_mllk, parvect0,
              x = x, m = m, q = q, k = k,
-             stationary = stationary, hessian = hessian
+             stationary = stationary, hessian = hessian, steptol = 0.00001
   )
   pn <- mar_hmm_pw2pn(
     m = m, q = q, k = k, parvect = mod$estimate,
@@ -291,13 +306,13 @@ mar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
 # Returns n * m matrix
 mar_dist_mat <- function(x, mod, n) {
   p <- matrix(NA, n, mod$m)
+  means <- get_all_mar_means(x, mod, mod$m, mod$q, mod$k)
   for (i in 1:n) {
-    mean <- get_mar_mean(mod$mu, mod$phi, x, mod$m, mod$q, mod$k, i)
     for (j in 1:mod$m) {
       p[i, j] <- pmvnorm(
         lower = rep(-Inf, mod$k),
         upper = x[, i],
-        mean = as.vector(mean[[j]]),
+        mean = as.vector(means[[j]][i, ]),
         sigma = mod$sigma[[j]]
       )
     }
@@ -361,6 +376,7 @@ mar_jacobian <- function(mod, n) {
 
   return(jacobian)
 }
+
 mar_bootstrap_estimates <- function(mod, n, len, stationary) {
   m <- mod$m
   k <- mod$k

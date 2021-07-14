@@ -26,7 +26,7 @@ get_all_ar_means <- function(mu, phi, m, q, x){
   n <- length(x)
   means <- matrix(mu, nrow = n, ncol = m, byrow = TRUE)
 
-  x_lags <- matrix(nrow = n, ncol = m)
+  x_lags <- matrix(nrow = n, ncol = q)
   for (i in 1:q){
     x_lag <- lag(x, i)
     x_lag[1:i] <- rep(0, i)

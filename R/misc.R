@@ -1,5 +1,3 @@
-#' @param mat
-#'
 #' @import bayesforecast
 #' @import chron
 #' @import dplyr
@@ -14,6 +12,8 @@
 #' @import stats
 #' @import tidyr
 #' @import utils
+#' @useDynLib hornsharkHMM, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
 
 #' Exponentiate diagonal elements
 #'

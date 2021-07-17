@@ -97,18 +97,9 @@ mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
 mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
   n <- ncol(x)
   pn <- mvnorm_hmm_pw2pn(m, k, parvect, stationary = stationary)
-  p <- mvnorm_densities(x[, 1], pn, m)
-  foo <- pn$delta * p
-  sumfoo <- sum(foo)
-  lscale <- log(sumfoo)
-  foo <- foo / sumfoo
-  for (i in 2:n) {
-    p <- mvnorm_densities(x[, i], pn, m)
-    foo <- foo %*% pn$gamma * p
-    sumfoo <- sum(foo)
-    lscale <- lscale + log(sumfoo)
-    foo <- foo / sumfoo
-  }
+  p <- mvnorm_densities2(x, pn, m, n)
+  foo <- matrix(pn$delta, ncol = m)
+  lscale <- foralg(n, m, foo, pn$gamma, p)
   mllk <- -lscale
   return(mllk)
 }

@@ -94,31 +94,31 @@ norm_hmm_pw2pn <- function(m, parvect, stationary = TRUE) {
 #'
 #' @examples
 norm_hmm_mllk <- function(parvect, x, m, stationary = TRUE) {
-  if (m == 1) {
-    return(-sum(dnorm(x, mean = parvect[1], sd = exp(parvect[2]), log = TRUE)))
-  }
   n <- length(x)
   pn <- norm_hmm_pw2pn(m, parvect, stationary = stationary)
-  foo <- pn$delta * dnorm(x[1], pn$mu, pn$sigma)
-  sumfoo <- sum(foo)
-  lscale <- log(sumfoo)
-  foo <- foo / sumfoo
-  for (i in 2:n) {
-    if (!is.na(x[i])) {
-      p <- dnorm(x[i], pn$mu, pn$sigma)
-    }
-    else {
-      p <- rep(1, m)
-    }
-    foo <- foo %*% pn$gamma * p
-    sumfoo <- sum(foo)
-    lscale <- lscale + log(sumfoo)
-    foo <- foo / sumfoo
-  }
+  p <- norm_densities(x, pn, m, n)
+  foo <- matrix(pn$delta, ncol = m)
+  lscale <- foralg(n, m, foo, pn$gamma, p)
   mllk <- -lscale
   return(mllk)
 }
 
+#' Returns normal densities
+#'
+#' @inheritParams norm_hmm_mllk
+#' @param n Number of observations
+#'
+#' @return Matrix of normal densities, dimensions n x m
+#' @export
+#'
+#' @examples
+norm_densities <- function(x, mod, m, n) {
+  p <- matrix(nrow = n, ncol = m)
+  for (i in 1:n) {
+    p[i, ] <- dnorm(x[i], mod$mu, mod$sigma)
+  }
+  return(p)
+}
 
 #' Maximum likelihood estimation of normal parameters
 #'

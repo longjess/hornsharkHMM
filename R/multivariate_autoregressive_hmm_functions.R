@@ -143,16 +143,8 @@ mar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE) {
   n <- ncol(x)
   pn <- mar_hmm_pw2pn(m, q, k, parvect, stationary = stationary)
   p <- mar_densities(x, pn, m, q, k, n)
-  foo <- pn$delta * p[1, ]
-  sumfoo <- sum(foo)
-  lscale <- log(sumfoo)
-  foo <- foo / sumfoo
-  for (i in 2:n) {
-    foo <- foo %*% pn$gamma * p[i, ]
-    sumfoo <- sum(foo)
-    lscale <- lscale + log(sumfoo)
-    foo <- foo / sumfoo
-  }
+  foo <- matrix(pn$delta, ncol = m)
+  lscale <- foralg(n, m, foo, pn$gamma, p)
   mllk <- -lscale
   return(mllk)
 }

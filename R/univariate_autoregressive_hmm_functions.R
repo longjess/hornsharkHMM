@@ -97,27 +97,20 @@ ar_hmm_pw2pn <- function(m, q, parvect, stationary = TRUE) {
 ar_hmm_mllk <- function(parvect, x, m, q, stationary = TRUE) {
   n <- length(x)
   pn <- ar_hmm_pw2pn(m, q, parvect, stationary = stationary)
-  foo <- pn$delta * dnorm(x[1], pn$mu, pn$sigma)
-  sumfoo <- sum(foo)
-  lscale <- log(sumfoo)
-  foo <- foo / sumfoo
-
-  means <- get_all_ar_means(pn$mu, pn$phi, m, q, x)
-  for (i in 2:n) {
-    if (!is.na(x[i])) {
-      p <- dnorm(x[i], means[i, ], pn$sigma)
-    }
-    else {
-      p <- rep(1, m)
-    }
-    foo <- foo %*% pn$gamma * p
-    sumfoo <- sum(foo)
-    lscale <- lscale + log(sumfoo)
-    foo <- foo / sumfoo
-  }
-
+  p <- ar_densities(x, pn, m, q, n)
+  foo <- matrix(pn$delta, ncol = m)
+  lscale <- foralg(n, m, foo, pn$gamma, p)
   mllk <- -lscale
   return(mllk)
+}
+
+ar_densities <- function(x, mod, m, q, n) {
+  p <- matrix(nrow = n, ncol = m)
+  means <- get_all_ar_means(mod$mu, mod$phi, m, q, x)
+  for (i in 1:n) {
+    p[i, ] <- dnorm(x[i], means[i, ], mod$sigma)
+  }
+  return(p)
 }
 
 ar_hmm_mle <- function(x, m, q, mu0, sigma0, gamma0, phi0,

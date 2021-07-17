@@ -152,10 +152,14 @@ mar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE) {
 # Returns n * m matrix of state dependent probability densities
 mar_densities <- function(x, mod, m, q, k, n) {
   p <- matrix(nrow = n, ncol = m)
+  cores <- detectCores()
   means <- get_all_mar_means(x, mod, m, q, k)
   for (i in 1:n) {
     for (j in 1:m) {
-      p[i, j] <- dmvnorm(x[, i], means[[j]][i, ], mod$sigma[[j]])
+      p[i, j] <- dmvnrm_arma_mc(matrix(x[, i], ncol = k),
+                                means[[j]][i, ],
+                                mod$sigma[[j]],
+                                cores = cores)
     }
   }
   return(p)

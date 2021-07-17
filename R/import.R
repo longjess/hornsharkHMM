@@ -15,4 +15,5 @@
 #' @useDynLib hornsharkHMM, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @import RcppArmadillo
+#' @import parallel
 NULL

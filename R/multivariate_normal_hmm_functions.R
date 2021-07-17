@@ -104,22 +104,27 @@ mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
   return(mllk)
 }
 
-# Get state dependent probability densities given x and mod
+# Get matrix of state dependent probability densities
 #'
 #' @param x Vector containing one observation
 #' @param mod List of parameters
 #' @param m Number of states
+#' @param n Number of observations
 #'
-#' @return Vector of state dependent probability densities
+#' @return n * m matrix of state dependent probability densities
 #' @export
 #'
 #' @examples
-mvnorm_densities <- function(x, mod, m) {
-  pvect <- numeric(m)
-  for (i in 1:m) {
-    pvect[i] <- dmvnorm(x, mod$mu[[i]], mod$sigma[[i]])
+mvnorm_densities <- function(x, mod, m, n) {
+  p <- matrix(nrow = n, ncol = m)
+  cores <- detectCores()
+  for (i in 1:n) {
+    for (j in 1:m) {
+      p[i, j] <- dmvnrm_arma_mc(matrix(x[, i], ncol = k),
+                                mod$mu[[j]], mod$sigma[[j]])
+    }
   }
-  return(pvect)
+  return(p)
 }
 
 #' Maximum likelihood estimation of normal parameters

@@ -6,6 +6,21 @@
 
 using namespace Rcpp;
 
+// dmvnrm_arma_mc
+arma::vec dmvnrm_arma_mc(arma::mat const& x, arma::rowvec const& mean, arma::mat const& sigma, bool const logd, int const cores);
+RcppExport SEXP _hornsharkHMM_dmvnrm_arma_mc(SEXP xSEXP, SEXP meanSEXP, SEXP sigmaSEXP, SEXP logdSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat const& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec const& >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< arma::mat const& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< bool const >::type logd(logdSEXP);
+    Rcpp::traits::input_parameter< int const >::type cores(coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(dmvnrm_arma_mc(x, mean, sigma, logd, cores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // foralg
 double foralg(int n, int N, arma::mat foo, arma::mat gamma, arma::mat allprobs);
 RcppExport SEXP _hornsharkHMM_foralg(SEXP nSEXP, SEXP NSEXP, SEXP fooSEXP, SEXP gammaSEXP, SEXP allprobsSEXP) {
@@ -34,6 +49,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_hornsharkHMM_dmvnrm_arma_mc", (DL_FUNC) &_hornsharkHMM_dmvnrm_arma_mc, 5},
     {"_hornsharkHMM_foralg", (DL_FUNC) &_hornsharkHMM_foralg, 5},
     {"_hornsharkHMM_timesTwo", (DL_FUNC) &_hornsharkHMM_timesTwo, 1},
     {NULL, NULL, 0}

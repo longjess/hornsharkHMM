@@ -32,4 +32,4 @@ Imports:
 URL: https://github.com/longjess/hornsharkHMM
 BugReports: https://github.com/longjess/hornsharkHMM/issues
 LinkingTo: 
-    Rcpp, RcppArmadillo 
+    Rcpp, RcppArmadillo

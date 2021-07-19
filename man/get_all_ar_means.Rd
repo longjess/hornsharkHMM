@@ -2,12 +2,12 @@
 % Please edit documentation in R/univariate_autoregressive_hmm_functions.R
 \name{get_all_ar_means}
 \alias{get_all_ar_means}
-\title{Get all means for autoregressive series x}
+\title{Get all means for autoregressive series}
 \usage{
 get_all_ar_means(mu, phi, m, q, x)
 }
 \arguments{
-\item{mu}{Vector of length m, containing means for each
+\item{mu}{Vector of length m, containing means for the white noise in each
 state dependent distribution}
 
 \item{phi}{Matrix of size m x q, containing autoregressive parameters. Each row contains
@@ -24,5 +24,5 @@ n x m matrix (where n is the number of observations)
 containing means for the autoregressive model
 }
 \description{
-Get all means for autoregressive series x
+Get all means for autoregressive series
 }

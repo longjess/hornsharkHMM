@@ -29,6 +29,6 @@ Vector of working parameters
 mu does not need to be transformed, as there are no constraints.
 We only need to transform diagonal elements of sigma, since there
 are no constraints on the covariances.
-Include only the lower triangular and diagional elementrs
+Include only the lower triangular and diagional elements
 of the sigma matrix, since covariance matrices must be symmetric.
 }

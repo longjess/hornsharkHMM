@@ -9,7 +9,7 @@ mvnorm_hmm_pseudo_residuals(x, mod, type, stationary = TRUE)
 \arguments{
 \item{x}{Matrix of observations, rows represent each variable}
 
-\item{mod}{List of parameters}
+\item{mod}{List of maximum likelihood estimation results}
 
 \item{type}{Type of pseudo-residual, either "ordinary" or "forecast"}
 

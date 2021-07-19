@@ -22,7 +22,7 @@ ar_hmm_mle(
 
 \item{m}{Number of states}
 
-\item{mu0}{Vector of length m, initial values for means}
+\item{mu0}{Vector of length m, initial values for means the white noise}
 
 \item{sigma0}{Vector of length m, initial values for standard deviations}
 

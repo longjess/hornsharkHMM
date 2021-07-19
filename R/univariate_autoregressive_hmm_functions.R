@@ -1,6 +1,6 @@
 #' Get mean corresponding to a given index in an autoregressive series
 #'
-#' @param mu Vector of length m, containing means for each
+#' @param mu Vector of length m, containing means for the white noise in each
 #' state dependent distribution
 #' @param phi Matrix of size m x q, containing autoregressive parameters. Each row contains
 #' the parameters corresponding to a single state.
@@ -33,7 +33,7 @@ get_ar_mean <- function(mu, phi, x, q, i) {
   return(mean)
 }
 
-#' Get all means for autoregressive series x
+#' Get all means for autoregressive series
 #'
 #' @param m Number of states
 #' @inheritParams get_ar_mean
@@ -89,7 +89,7 @@ ar_hmm_generate_sample <- function(ns, mod) {
 #' mu does not need to be transformed, as there are no constraints.
 #'
 #' @param m Number of states
-#' @param mu Vector of length m, containing means for each
+#' @param mu Vector of length m, containing means for the white noise in each
 #' state dependent normal distribution
 #' @param sigma Vector of length m, containing standard
 #' deviations for each state dependent normal distribution
@@ -194,7 +194,7 @@ ar_densities <- function(x, mod, m, q, n) {
 
 #' Maximum likelihood estimation of univariate autoregresive parameters
 #'
-#' @param mu0 Vector of length m, initial values for means
+#' @param mu0 Vector of length m, initial values for means the white noise
 #' @param sigma0 Vector of length m, initial values for standard deviations
 #' @param gamma0 Matrix of size m x m, initial values for transition probability matrix
 #' @param phi0 Matrix of size m x q, initial values for autoregressive parameters
@@ -248,7 +248,7 @@ ar_hmm_mle <- function(x, m, q, mu0, sigma0, gamma0, phi0,
 #' Global decoding of states
 #'
 #' @param x Vector of observations
-#' @param mod List of HMM parameters
+#' @param mod List of maximum likelihood estimation results
 #'
 #' @return Dataframe of decoded states and index
 #' @export

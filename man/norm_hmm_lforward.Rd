@@ -9,7 +9,7 @@ norm_hmm_lforward(x, mod)
 \arguments{
 \item{x}{Vector of observations}
 
-\item{mod}{List of HMM parameters}
+\item{mod}{List of maximum likelihood estimation results}
 }
 \value{
 Matrix of forward probabilities

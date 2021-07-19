@@ -7,7 +7,7 @@
 get_ar_mean(mu, phi, x, q, i)
 }
 \arguments{
-\item{mu}{Vector of length m, containing means for each
+\item{mu}{Vector of length m, containing means for the white noise in each
 state dependent distribution}
 
 \item{phi}{Matrix of size m x q, containing autoregressive parameters. Each row contains

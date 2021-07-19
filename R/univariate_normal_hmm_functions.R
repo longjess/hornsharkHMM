@@ -189,7 +189,7 @@ norm_hmm_generate_sample <- function(ns, mod) {
 #' Global decoding of states
 #'
 #' @param x Vector of observations
-#' @param mod List of HMM parameters
+#' @param mod List of maximum likelihood estimation results
 #'
 #' @return Dataframe of decoded states and index
 #' @export

@@ -9,7 +9,7 @@ ar_hmm_pn2pw(m, mu, sigma, gamma, phi, delta = NULL, stationary = TRUE)
 \arguments{
 \item{m}{Number of states}
 
-\item{mu}{Vector of length m, containing means for each
+\item{mu}{Vector of length m, containing means for the white noise in each
 state dependent normal distribution}
 
 \item{sigma}{Vector of length m, containing standard

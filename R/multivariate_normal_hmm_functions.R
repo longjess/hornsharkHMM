@@ -3,7 +3,7 @@
 #' mu does not need to be transformed, as there are no constraints.
 #' We only need to transform diagonal elements of sigma, since there
 #' are no constraints on the covariances.
-#' Include only the lower triangular and diagional elementrs
+#' Include only the lower triangular and diagional elements
 #' of the sigma matrix, since covariance matrices must be symmetric.
 #'
 #' @param m Number of states
@@ -104,7 +104,7 @@ mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
   return(mllk)
 }
 
-# Get matrix of state dependent probability densities
+#' Get matrix of state dependent probability densities
 #'
 #' @param x Vector containing one observation
 #' @param mod List of parameters
@@ -183,8 +183,9 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
 #' @param ns Number of samples
 #' @param mod List of model parameters
 #'
-#' @return k * ns matrix containing generated samples,
-#' where k is the number of variables
+#' @return List including vector of indices, vector of states,
+#' and k x ns matrix containing generated samples
+#' (where k is the number of variables)
 #' @export
 #'
 #' @examples
@@ -218,7 +219,7 @@ mvnorm_hmm_sample_one <- function(state, mod) {
 #' Global decoding of states
 #'
 #' @param x Matrix of observations, rows represent each variable
-#' @param mod List of parameters
+#' @param mod List of maximum likelihood estimation results
 #'
 #' @return Dataframe of decoded states and index
 #' @export

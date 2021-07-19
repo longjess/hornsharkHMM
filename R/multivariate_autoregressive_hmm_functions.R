@@ -1,11 +1,22 @@
-# q: order of autoregressive model
-# phi: autoregressive model parameters, as list of qxq matrices
-
-# Get mean for given x in multivariate autoregressive series
-# phi is a list of matrices
-# i is the time index
-
-
+#' Get mean corresponding to a given index in a multivariate autoregressive series
+#'
+#' @param mu List of vectors of length m, means for white noise in each
+#' state dependent distribution
+#' @param phi List of k x (k x q) matrices, containing the autoregressive
+#' parameters. Each matrix corresponds to a state. The first k x k entries
+#' are the parameters for index i - 1, and so on up to index i - q.
+#' @param x Observations coming from a multivariate autoregressive series,
+#' in a matrix with k rows. Each row corresponds to a variable.
+#' @param m Number of states
+#' @param q Order of the autoregressive model
+#' @param k Number of variables
+#' @param i Index of the desired mean
+#'
+#' @return List of vectors of length m containing means corresponding to index i
+#' for the given autoregressive model
+#' @export
+#'
+#' @examples
 get_mar_mean <- function(mu, phi, x, m, q, k, i) {
   if (i == 1) {
     mean <- mu
@@ -28,6 +39,17 @@ get_mar_mean <- function(mu, phi, x, m, q, k, i) {
   return(mean)
 }
 
+#' Get all means for multivariate autoregressive series
+#'
+#' @param mod List of HMM parameters
+#' @inheritParams get_mar_mean
+#'
+#' @return List of autoregressive means corresponding to
+#' each state. Means are in a n x k matrix, where
+#' n is the number of observations.
+#' @export
+#'
+#' @examples
 get_all_mar_means <- function(x, mod, m, q, k) {
   n <- ncol(x)
   x_lags <- matrix(0, nrow = n, ncol = k * q)
@@ -44,6 +66,17 @@ get_all_mar_means <- function(x, mod, m, q, k) {
   return(means)
 }
 
+#'Generate samples from HMM with multivariate autoregressive model
+#'
+#' @param ns Number of samples
+#' @param mod List of model parameters
+#'
+#' @return List including vector of indices, vector of states,
+#' and k x ns matrix containing generated samples
+#' (where k is the number of variables)
+#' @export
+#'
+#' @examples
 mar_hmm_generate_sample <- function(ns, mod) {
   mvect <- 1:mod$m
   state <- numeric(ns)
@@ -61,6 +94,26 @@ mar_hmm_generate_sample <- function(ns, mod) {
   return(list(index = c(1:ns), state = state, obs = x))
 }
 
+#' Transform multivariate autoregressive natural parameters to working parameters
+#'
+#' mu and phi do not need to be transformed, as there are no constraints.
+#' We only need to transform diagonal elements of sigma, since there
+#' are no constraints on the covariances.
+#' Include only the lower triangular and diagional elements
+#' of the sigma matrix, since covariance matrices must be symmetric.
+#'
+#' @param sigma List of matrices of size m x m, covariance matrices
+#' for each state dependent distribution
+#' @param gamma Transition probabiilty matrix, size m x m
+#' @param delta Optional, vector of length m containing
+#' initial distribution
+#' @param stationary Boolean, whether the HMM is stationary or not
+#' @inheritParams get_mar_mean
+#'
+#' @return Vector of working parameters
+#' @export
+#'
+#' @examples
 mar_hmm_pn2pw <- function(m, mu, sigma, gamma, phi,
                           delta = NULL, stationary = TRUE) {
   mu <- unlist(mu, use.names = FALSE)
@@ -79,22 +132,15 @@ mar_hmm_pn2pw <- function(m, mu, sigma, gamma, phi,
   return(parvect)
 }
 
-diag_log_lower <- function(mat) {
-  diag(mat) <- log(diag(mat))
-  vect <- mat[lower.tri(mat, diag = TRUE)]
-  return(vect)
-}
-
-diag_exp <- function(mat) {
-  diag(mat) <- exp(diag(mat))
-  return(mat)
-}
-
-triangular_num <- function(n) {
-  nums <- choose(seq(n + 1), 2)
-  return(nums[n + 1])
-}
-
+#' Transform multivariate autoregressive working parameters to natural parameters
+#'
+#' @inheritParams mar_hmm_pn2pw
+#' @param parvect Vector of working parameters
+#'
+#' @return List of natural parameters
+#' @export
+#'
+#' @examples
 mar_hmm_pw2pn <- function(m, q, k, parvect, stationary = TRUE) {
   mu <- list()
   count <- 1
@@ -141,6 +187,15 @@ mar_hmm_pw2pn <- function(m, q, k, parvect, stationary = TRUE) {
   return(list(mu = mu, sigma = sigma, gamma = gamma, phi = phi, delta = delta))
 }
 
+#' Get negative log-likelihood from the working parameters
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @inheritParams mar_hmm_pw2pn
+#'
+#' @return Negative log-likelihood
+#' @export
+#'
+#' @examples
 mar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE) {
   n <- ncol(x)
   pn <- mar_hmm_pw2pn(m, q, k, parvect, stationary = stationary)
@@ -151,7 +206,17 @@ mar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE) {
   return(mllk)
 }
 
-# Returns n * m matrix of state dependent probability densities
+
+#' Get matrix of state dependent probability densities
+#'
+#' @inheritParams mar_hmm_mllk
+#' @param mod List of parameters
+#' @param n Number of observations
+#'
+#' @return n x m matrix of state dependent probability densities
+#' @export
+#'
+#' @examples
 mar_densities <- function(x, mod, m, q, k, n) {
   p <- matrix(nrow = n, ncol = m)
   cores <- detectCores()
@@ -167,7 +232,24 @@ mar_densities <- function(x, mod, m, q, k, n) {
   return(p)
 }
 
-# Computing MLE from natural parameters
+#' Maximum likelihood estimation of multivariate normal parameters
+#'
+#' @inheritParams mar_hmm_mllk
+#' @param mu0 List of vectors of length m, initial values for means for
+#' white noise
+#' @param sigma0 List of matrices of size m x m,
+#' initial values for covariance matrices
+#' @param gamma0 Initial values for ransition probabiilty matrix, size m x m
+#' @param phi0 List of matrices of size k x (k x q), initial values for
+#' autoregressive parameters
+#' @param delta0 Optional, vector of length m containing initial values
+#' initial distribution
+#' @param hessian Boolean, whether to return the inverse hessian
+#'
+#' @return List of results
+#' @export
+#'
+#' @examples
 mar_hmm_mle <- function(x, m, q, k, mu0, sigma0, gamma0, phi0, delta0 = NULL,
                         stationary = TRUE, hessian = FALSE) {
   parvect0 <- mar_hmm_pn2pw(m, mu0, sigma0, gamma0, phi0, delta0,
@@ -205,6 +287,15 @@ mar_hmm_mle <- function(x, m, q, k, mu0, sigma0, gamma0, phi0, delta0 = NULL,
   }
 }
 
+#' Global decoding of states
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @param mod List of maximum likelihood estimation results
+#'
+#' @return Dataframe of decoded states and index
+#' @export
+#'
+#' @examples
 mar_hmm_viterbi <- function(x, mod) {
   n <- ncol(x)
   xi <- matrix(0, n, mod$m)
@@ -223,6 +314,14 @@ mar_hmm_viterbi <- function(x, mod) {
   return(data_frame(index = 1:n, state = iv))
 }
 
+#' Get forward probabilities
+#'
+#' @inheritParams mar_hmm_viterbi
+#'
+#' @return Matrix of forward probabilities
+#' @export
+#'
+#' @examples
 mar_hmm_lforward <- function(x, mod) {
   n <- ncol(x)
   lalpha <- matrix(NA, mod$m, n)
@@ -242,6 +341,14 @@ mar_hmm_lforward <- function(x, mod) {
   return(lalpha)
 }
 
+#' Get backward probabilities
+#'
+#' @inheritParams mar_hmm_viterbi
+#'
+#' @return Matrix of backward probabilities
+#' @export
+#'
+#' @examples
 mar_hmm_lbackward <- function(x, mod) {
   n <- ncol(x)
   m <- mod$m
@@ -260,6 +367,16 @@ mar_hmm_lbackward <- function(x, mod) {
   return(lbeta)
 }
 
+#' Generate pseudo residuals
+#'
+#' @inheritParams mar_hmm_viterbi
+#' @param type Type of pseudo-residual, either "ordinary" or "forecast"
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Dataframe of pseudo-residuals, observations, index
+#' @export
+#'
+#' @examples
 mar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   if (stationary) {
     delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
@@ -300,8 +417,15 @@ mar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   }
 }
 
-# Get multivariate normal distribution given mod and x
-# Returns n * m matrix
+#' Get multivariate autoregressive distribution function
+#'
+#' @inheritParams mar_hmm_viterbi
+#' @param n Number of observations
+#'
+#' @return Matrix of multivariate autoregressive probabilities
+#' @export
+#'
+#' @examples
 mar_dist_mat <- function(x, mod, n) {
   p <- matrix(NA, n, mod$m)
   means <- get_all_mar_means(x, mod, mod$m, mod$q, mod$k)
@@ -318,6 +442,20 @@ mar_dist_mat <- function(x, mod, n) {
   return(p)
 }
 
+#' Get inverse of hessian matrix
+#'
+#' Transform hessian associated with working parameters
+#' outputted by nlm.
+#' If not stationary, exclude values associated with delta parameter
+#' from the hessian matrix.
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Inverse hessian matrix
+#' @export
+#'
+#' @examples
 mar_inv_hessian <- function(mod, stationary = TRUE){
   if (!stationary) {
     np2 <- mod$np - mod$m + 1
@@ -333,6 +471,15 @@ mar_inv_hessian <- function(mod, stationary = TRUE){
   return(h)
 }
 
+#' Get Jacobian matrix
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Total number of working parameters (excluding delta)
+#'
+#' @return Jacobian matrix
+#' @export
+#'
+#' @examples
 mar_jacobian <- function(mod, n) {
   m <- mod$m
   q <- mod$q
@@ -375,6 +522,17 @@ mar_jacobian <- function(mod, n) {
   return(jacobian)
 }
 
+#' Get bootstrapped estimates of parameters
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Number of bootstrap samples
+#' @param len Number of observations
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return List of estimates
+#' @export
+#'
+#' @examples
 mar_bootstrap_estimates <- function(mod, n, len, stationary) {
   m <- mod$m
   k <- mod$k
@@ -408,6 +566,17 @@ mar_bootstrap_estimates <- function(mod, n, len, stationary) {
   ))
 }
 
+#' Confidence intervals for estimated parameters by bootstrapping
+#'
+#' @param mod Maximum likelihood estimates of parameters
+#' @param bootstrap Bootstrapped estimates for parameters
+#' @param alpha Confidence level
+#'
+#' @return List of lower and upper bounds for confidence intervals
+#' for each parameter
+#' @export
+#'
+#' @examples
 mar_bootstrap_ci <- function(mod, bootstrap, alpha) {
   m <- mod$m
   k <- mod$k
@@ -433,7 +602,6 @@ mar_bootstrap_ci <- function(mod, bootstrap, alpha) {
     }
   }
 
-  # Only want lower triangle of each sigma matrix, since is symmetric
   t <- triangular_num(k)
   mat <- matrix(c(1:(k * k)), k)
   tvect <- mat[lower.tri(mat, diag = TRUE)]

@@ -12,8 +12,9 @@ mvnorm_hmm_generate_sample(ns, mod)
 \item{mod}{List of model parameters}
 }
 \value{
-k * ns matrix containing generated samples,
-where k is the number of variables
+List including vector of indices, vector of states,
+and k x ns matrix containing generated samples
+(where k is the number of variables)
 }
 \description{
 Generate samples from HMM with multivariate normal distribution

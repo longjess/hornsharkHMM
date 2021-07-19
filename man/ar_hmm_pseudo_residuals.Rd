@@ -9,7 +9,7 @@ ar_hmm_pseudo_residuals(x, mod, type, stationary)
 \arguments{
 \item{x}{Vector of observations}
 
-\item{mod}{List of HMM parameters}
+\item{mod}{List of maximum likelihood estimation results}
 
 \item{type}{Type of pseudo-residual, either "ordinary" or "forecast"}
 

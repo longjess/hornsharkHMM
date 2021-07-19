@@ -9,7 +9,7 @@ mvnorm_hmm_viterbi(x, mod)
 \arguments{
 \item{x}{Matrix of observations, rows represent each variable}
 
-\item{mod}{List of parameters}
+\item{mod}{List of maximum likelihood estimation results}
 }
 \value{
 Dataframe of decoded states and index

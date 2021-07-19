@@ -1,6 +1,18 @@
-# Get mean for given x in autoregressive series
-# phi is a mxq matrix
-# i is the time index
+#' Get mean corresponding to a given index in an autoregressive series
+#'
+#' @param mu Vector of length m, containing means for each
+#' state dependent distribution
+#' @param phi Matrix of size m x q, containing autoregressive parameters. Each row contains
+#' the parameters corresponding to a single state.
+#' @param x Vector of observations coming from an autoregressive series
+#' @param q Order of the autoregressive model
+#' @param i Index of the desired mean
+#'
+#' @return Vector of length m containing means corresponding to index i
+#' for the given autoregressive model
+#' @export
+#'
+#' @examples
 get_ar_mean <- function(mu, phi, x, q, i) {
   if (i == 1) {
     mean <- mu
@@ -21,7 +33,16 @@ get_ar_mean <- function(mu, phi, x, q, i) {
   return(mean)
 }
 
-# Get all means for a given autoregressive series x
+#' Get all means for autoregressive series x
+#'
+#' @param m Number of states
+#' @inheritParams get_ar_mean
+#'
+#' @return n x m matrix (where n is the number of observations)
+#' containing means for the autoregressive model
+#' @export
+#'
+#' @examples
 get_all_ar_means <- function(mu, phi, m, q, x){
   n <- length(x)
   means <- matrix(mu, nrow = n, ncol = m, byrow = TRUE)
@@ -40,6 +61,15 @@ get_all_ar_means <- function(mu, phi, m, q, x){
   return(means)
 }
 
+#' Generate sample from HMM with autoregressive model
+#'
+#' @param ns Sample size
+#' @param mod List of HMM parameters
+#'
+#' @return Dataframe including index, state, obs
+#' @export
+#'
+#' @examples
 ar_hmm_generate_sample <- function(ns, mod) {
   mvect <- 1:mod$m
   state <- numeric(ns)
@@ -54,6 +84,26 @@ ar_hmm_generate_sample <- function(ns, mod) {
   return(data_frame(index = c(1:ns), state = state, obs = x))
 }
 
+#' Transform normal natural parameters to working parameters
+#'
+#' mu does not need to be transformed, as there are no constraints.
+#'
+#' @param m Number of states
+#' @param mu Vector of length m, containing means for each
+#' state dependent normal distribution
+#' @param sigma Vector of length m, containing standard
+#' deviations for each state dependent normal distribution
+#' @param gamma Transition probabiilty matrix, size m x m
+#' @param phi m x q matrix of autoregressive parameters. Each row contains
+#' the parameters corresponding to a single state.
+#' @param delta Optional, vector of length m containing
+#' initial distribution
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Vector of working parameters
+#' @export
+#'
+#' @examples
 ar_hmm_pn2pw <- function(m, mu, sigma, gamma, phi,
                          delta = NULL, stationary = TRUE) {
   tsigma <- log(sigma)
@@ -70,6 +120,16 @@ ar_hmm_pn2pw <- function(m, mu, sigma, gamma, phi,
   return(parvect)
 }
 
+#' Transform normal working parameters to natural parameters
+#'
+#' @param q Order of the autoregressive model
+#' @param parvect Vector of working parameters
+#' @inheritParams ar_hmm_pn2pw
+#'
+#' @return List of natural parameters mu, sigma, gamma, phi, delta
+#' @export
+#'
+#' @examples
 ar_hmm_pw2pn <- function(m, q, parvect, stationary = TRUE) {
   mu <- parvect[1:m]
   sigma <- exp(parvect[(m + 1):(2 * m)])
@@ -94,6 +154,15 @@ ar_hmm_pw2pn <- function(m, q, parvect, stationary = TRUE) {
   return(list(mu = mu, sigma = sigma, gamma = gamma, phi = phi, delta = delta))
 }
 
+#' Get negative log-likelihood from the working parameters
+#'
+#' @param x Vector of observations
+#' @inheritParams ar_hmm_pn2pw
+#'
+#' @return Negative log-likelihood
+#' @export
+#'
+#' @examples
 ar_hmm_mllk <- function(parvect, x, m, q, stationary = TRUE) {
   n <- length(x)
   pn <- ar_hmm_pw2pn(m, q, parvect, stationary = stationary)
@@ -104,6 +173,16 @@ ar_hmm_mllk <- function(parvect, x, m, q, stationary = TRUE) {
   return(mllk)
 }
 
+#' Returns densities for autoregressive model
+#'
+#' @param mod List of HMM parameters
+#' @param n Number of observations
+#' @inheritParams ar_hmm_mllk
+#'
+#' @return n x m matrix of densities for autoregressive model
+#' @export
+#'
+#' @examples
 ar_densities <- function(x, mod, m, q, n) {
   p <- matrix(nrow = n, ncol = m)
   means <- get_all_ar_means(mod$mu, mod$phi, m, q, x)
@@ -113,9 +192,24 @@ ar_densities <- function(x, mod, m, q, n) {
   return(p)
 }
 
+#' Maximum likelihood estimation of univariate autoregresive parameters
+#'
+#' @param mu0 Vector of length m, initial values for means
+#' @param sigma0 Vector of length m, initial values for standard deviations
+#' @param gamma0 Matrix of size m x m, initial values for transition probability matrix
+#' @param phi0 Matrix of size m x q, initial values for autoregressive parameters
+#' @param delta0 Optional, vector of length m, initial values for
+#' initial distribution
+#' @param hessian Boolean, whether to return the inverse hessian
+#' @inheritParams ar_hmm_mllk
+#'
+#' @return List of results
+#' @export
+#'
+#' @examples
 ar_hmm_mle <- function(x, m, q, mu0, sigma0, gamma0, phi0,
                        delta0 = NULL, stationary = TRUE,
-                       hessian = FALSE, ...) {
+                       hessian = FALSE) {
   parvect0 <- ar_hmm_pn2pw(m, mu0, sigma0, gamma0, phi0, delta0,
                            stationary = stationary
   )
@@ -151,6 +245,15 @@ ar_hmm_mle <- function(x, m, q, mu0, sigma0, gamma0, phi0,
   }
 }
 
+#' Global decoding of states
+#'
+#' @param x Vector of observations
+#' @param mod List of HMM parameters
+#'
+#' @return Dataframe of decoded states and index
+#' @export
+#'
+#' @examples
 ar_hmm_viterbi <- function(x, mod) {
   n <- length(x)
   xi <- matrix(0, n, mod$m)
@@ -172,6 +275,14 @@ ar_hmm_viterbi <- function(x, mod) {
   return(data_frame(index = 1:n, state = iv))
 }
 
+#' Get forward probabilities
+#'
+#' @inheritParams ar_hmm_viterbi
+#'
+#' @return Matrix of forward probabilities
+#' @export
+#'
+#' @examples
 ar_hmm_lforward <- function(x, mod) {
   n <- length(x)
   lalpha <- matrix(NA, mod$m, n)
@@ -194,6 +305,14 @@ ar_hmm_lforward <- function(x, mod) {
   return(lalpha)
 }
 
+#' Get backward probabilities
+#'
+#' @inheritParams ar_hmm_viterbi
+#'
+#' @return Matrix of backward probabilities
+#' @export
+#'
+#' @examples
 ar_hmm_lbackward <- function(x, mod) {
   n <- length(x)
   m <- mod$m
@@ -215,6 +334,16 @@ ar_hmm_lbackward <- function(x, mod) {
   return(lbeta)
 }
 
+#' Generate pseudo residuals
+#'
+#' @inheritParams ar_hmm_viterbi
+#' @param type Type of pseudo-residual, either "ordinary" or "forecast"
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Dataframe of pseudo-residuals, observations, index
+#' @export
+#'
+#' @examples
 ar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   if (stationary) {
     delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
@@ -269,6 +398,20 @@ ar_hmm_pseudo_residuals <- function(x, mod, type, stationary) {
   }
 }
 
+#' Get inverse of hessian matrix
+#'
+#' Transform hessian associated with working parameters
+#' outputted by nlm.
+#' If not stationary, exclude values associated with delta parameter
+#' from the hessian matrix.
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Inverse hessian matrix
+#' @export
+#'
+#' @examples
 ar_inv_hessian <- function(mod, stationary = TRUE){
   if (!stationary) {
     np2 <- mod$np - mod$m + 1
@@ -284,7 +427,16 @@ ar_inv_hessian <- function(mod, stationary = TRUE){
   return(h)
 }
 
-ar_jacobian <- function(mod, np2) {
+#' Get Jacobian matrix
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Total number of working parameters (excluding delta)
+#'
+#' @return Jacobian matrix, size n x n
+#' @export
+#'
+#' @examples
+ar_jacobian <- function(mod, n) {
   m <- mod$m
   q <- mod$q
   jacobian <- matrix(0, nrow = n, ncol = n)
@@ -311,6 +463,17 @@ ar_jacobian <- function(mod, np2) {
   return(jacobian)
 }
 
+#' Get bootstrapped estimates of parameters
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Number of bootstrap samples
+#' @param len Number of observations
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return List of estimates
+#' @export
+#'
+#' @examples
 ar_bootstrap_estimates <- function(mod, n, len, stationary) {
   m <- mod$m
   q <- mod$q
@@ -341,6 +504,17 @@ ar_bootstrap_estimates <- function(mod, n, len, stationary) {
   ))
 }
 
+#' Confidence intervals for estimated parameters by bootstrapping
+#'
+#' @param mod Maximum likelihood estimates of parameters
+#' @param bootstrap Bootstrapped estimates for parameters
+#' @param alpha Confidence level
+#'
+#' @return List of lower and upper bounds for confidence intervals
+#' for each parameter
+#' @export
+#'
+#' @examples
 ar_bootstrap_ci <- function(mod, bootstrap, alpha) {
   m <- mod$m
   mu_lower <- rep(NA, m)

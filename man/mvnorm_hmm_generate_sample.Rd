@@ -12,7 +12,7 @@ mvnorm_hmm_generate_sample(ns, mod)
 \item{mod}{List of model parameters}
 }
 \value{
-k x ns matrix containing generated samples,
+k * ns matrix containing generated samples,
 where k is the number of variables
 }
 \description{

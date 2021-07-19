@@ -111,7 +111,7 @@ mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
 #' @param m Number of states
 #' @param n Number of observations
 #'
-#' @return n * m matrix of state dependent probability densities
+#' @return n x m matrix of state dependent probability densities
 #' @export
 #'
 #' @examples
@@ -127,7 +127,7 @@ mvnorm_densities <- function(x, mod, m, n) {
   return(p)
 }
 
-#' Maximum likelihood estimation of normal parameters
+#' Maximum likelihood estimation of multivariate normal parameters
 #'
 #' @param x Matrix of observations, rows represent each variable
 #' @param m Number of states
@@ -183,7 +183,7 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
 #' @param ns Number of samples
 #' @param mod List of model parameters
 #'
-#' @return k x ns matrix containing generated samples,
+#' @return k * ns matrix containing generated samples,
 #' where k is the number of variables
 #' @export
 #'

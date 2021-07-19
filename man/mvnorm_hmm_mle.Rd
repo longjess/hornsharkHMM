@@ -2,7 +2,7 @@
 % Please edit documentation in R/multivariate_normal_hmm_functions.R
 \name{mvnorm_hmm_mle}
 \alias{mvnorm_hmm_mle}
-\title{Maximum likelihood estimation of normal parameters}
+\title{Maximum likelihood estimation of multivariate normal parameters}
 \usage{
 mvnorm_hmm_mle(
   x,
@@ -41,5 +41,5 @@ initial distribution}
 List of results
 }
 \description{
-Maximum likelihood estimation of normal parameters
+Maximum likelihood estimation of multivariate normal parameters
 }

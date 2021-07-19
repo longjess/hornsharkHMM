@@ -4,6 +4,8 @@
 # Get mean for given x in multivariate autoregressive series
 # phi is a list of matrices
 # i is the time index
+
+
 get_mar_mean <- function(mu, phi, x, m, q, k, i) {
   if (i == 1) {
     mean <- mu

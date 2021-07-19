@@ -106,6 +106,7 @@ norm_hmm_mllk <- function(parvect, x, m, stationary = TRUE) {
 #' Returns normal densities
 #'
 #' @inheritParams norm_hmm_mllk
+#' @param mod List of HMM parameters
 #' @param n Number of observations
 #'
 #' @return Matrix of normal densities, dimensions n x m
@@ -120,12 +121,12 @@ norm_densities <- function(x, mod, m, n) {
   return(p)
 }
 
-#' Maximum likelihood estimation of normal parameters
+#' Maximum likelihood estimation of univariate normal parameters
 #'
-#' @param mu0 Vector of length m, initial value for means
-#' @param sigma0 Vector of length m, initial value for standard deviations
-#' @param gamma0 Matrix of size m x m, initial value for transition probability matrix
-#' @param delta0 Optional, vector of length m, initial value for
+#' @param mu0 Vector of length m, initial values for means
+#' @param sigma0 Vector of length m, initial values for standard deviations
+#' @param gamma0 Matrix of size m x m, initial values for transition probability matrix
+#' @param delta0 Optional, vector of length m, initial values for
 #' initial distribution
 #' @param hessian Boolean, whether to return the inverse hessian
 #' @inheritParams norm_hmm_mllk
@@ -360,7 +361,7 @@ norm_inv_hessian <- function(mod, stationary = TRUE){
 #' @param mod List of maximum likelihood estimation results
 #' @param n Total number of working parameters (excluding delta)
 #'
-#' @return Jacobian matrix
+#' @return Jacobian matrix, size n x n
 #' @export
 #'
 #' @examples

@@ -9,6 +9,8 @@ norm_densities(x, mod, m, n)
 \arguments{
 \item{x}{Vector of observations}
 
+\item{mod}{List of HMM parameters}
+
 \item{m}{Number of states}
 
 \item{n}{Number of observations}

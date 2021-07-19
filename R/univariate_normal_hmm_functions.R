@@ -357,10 +357,8 @@ norm_inv_hessian <- function(mod, stationary = TRUE){
 
 #' Get Jacobian matrix
 #'
-#' @param m Number of states
+#' @param mod List of maximum likelihood estimation results
 #' @param n Total number of working parameters (excluding delta)
-#' @param parvect Vector of working parameters
-#' @param stationary Boolean, whether the HMM is stationary or not
 #'
 #' @return Jacobian matrix
 #' @export
@@ -389,7 +387,7 @@ norm_jacobian <- function(mod, n) {
 
 #' Get bootstrapped estimates of parameters
 #'
-#' @param mod List of HMM parameters
+#' @param mod List of maximum likelihood estimation results
 #' @param n Number of bootstrap samples
 #' @param len Number of observations
 #' @param stationary Boolean, whether the HMM is stationary or not
@@ -453,8 +451,9 @@ norm_bootstrap_covariance <- function(bootstrap, m, n) {
 #' Confidence intervals for estimated parameters by bootstrapping
 #'
 #' @param mod Maximum likelihood estimates of parameters
+#' @param bootstrap Bootstrapped estimates for parameters
 #' @param alpha Confidence level
-#' @inheritParams norm_bootstrap_covariance
+#' @param m Number of states
 #'
 #' @return List of lower and upper bounds for confidence intervals
 #' for each parameter

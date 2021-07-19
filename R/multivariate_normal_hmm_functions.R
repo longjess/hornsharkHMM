@@ -243,7 +243,14 @@ mvnorm_hmm_viterbi <- function(x, mod) {
   return(data_frame(index = 1:n, state = iv))
 }
 
-# Computing log(forward probabilities) for normal distribution
+#' Get forward probabilities
+#'
+#' @inheritParams mvnorm_hmm_viterbi
+#'
+#' @return Matrix of forward probabilities
+#' @export
+#'
+#' @examples
 mvnorm_hmm_lforward <- function(x, mod) {
   n <- ncol(x)
   lalpha <- matrix(NA, mod$m, n)
@@ -262,7 +269,14 @@ mvnorm_hmm_lforward <- function(x, mod) {
   return(lalpha)
 }
 
-# Computing log(backward probabilities) for normal distribution
+#' Get backward probabilities
+#'
+#' @inheritParams mvnorm_hmm_viterbi
+#'
+#' @return Matrix of backward probabilities
+#' @export
+#'
+#' @examples
 mvnorm_hmm_lbackward <- function(x, mod) {
   n <- ncol(x)
   m <- mod$m
@@ -280,9 +294,16 @@ mvnorm_hmm_lbackward <- function(x, mod) {
   return(lbeta)
 }
 
-
-# Normal pseudo-residuals for Normal HMM
-# Type can be "ordinary" or "forecast"
+#' Generate pseudo residuals
+#'
+#' @inheritParams mvnorm_hmm_viterbi
+#' @param type Type of pseudo-residual, either "ordinary" or "forecast"
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Dataframe of pseudo-residuals, observations, index
+#' @export
+#'
+#' @examples
 mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
   if (stationary) {
     delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
@@ -323,7 +344,14 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
   }
 }
 
-# Get multivariate normal distribution given mod and x
+#' Get multivariate normal distribution function
+#'
+#' @inheritParams mvnorm_hmm_viterbi
+#'
+#' @return Matrix of multivariate normal probabilities
+#' @export
+#'
+#' @examples
 mvnorm_dist_mat <- function(x, mod) {
   p <- matrix(NA, n, mod$m)
   for (i in 1:n) {
@@ -335,6 +363,20 @@ mvnorm_dist_mat <- function(x, mod) {
   return(p)
 }
 
+#' Get inverse of hessian matrix
+#'
+#' Transform hessian associated with working parameters
+#' outputted by nlm.
+#' If not stationary, exclude values associated with delta parameter
+#' from the hessian matrix.
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Inverse hessian matrix
+#' @export
+#'
+#' @examples
 mvnorm_inv_hessian <- function(mod, stationary = TRUE){
   if (!stationary) {
     np2 <- mod$np - mod$m + 1
@@ -351,17 +393,21 @@ mvnorm_inv_hessian <- function(mod, stationary = TRUE){
 }
 
 
-# Jacobian matrix for parameters
-# n should be total number of parameters estimated, excluding delta
+#' Get Jacobian matrix
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Total number of working parameters (excluding delta)
+#'
+#' @return Jacobian matrix
+#' @export
+#'
+#' @examples
 mvnorm_jacobian <- function(mod, n) {
   m <- mod$m
   k <- mod$k
   jacobian <- matrix(0, nrow = n, ncol = n)
-  # Jacobian for mu only is a m*k identity matrix
   jacobian[1:(m * k), 1:(m * k)] <- diag(m * k)
-  # count is the row at which the current parameter's derivatives are placed
   rowcount <- m * k + 1
-  # There are t*m sigma parameters
   t <- triangular_num(k)
   for (i in 1:m) {
     sigma <- mod$sigma[[i]]
@@ -391,7 +437,18 @@ mvnorm_jacobian <- function(mod, n) {
 }
 
 
-# Bootstrapping estimates
+#' Get bootstrapped estimates of parameters
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Number of bootstrap samples
+#' @param k Number of variables
+#' @param len Number of observations
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return List of estimates
+#' @export
+#'
+#' @examples
 mvnorm_bootstrap_estimates <- function(mod, n, k, len, stationary) {
   m <- mod$m
   mu_estimate <- numeric(n * m * k)
@@ -413,8 +470,20 @@ mvnorm_bootstrap_estimates <- function(mod, n, k, len, stationary) {
               gamma = gamma_estimate, delta = delta_estimate))
 }
 
+#' Confidence intervals for estimated parameters by bootstrapping
+#'
+#' @param mod Maximum likelihood estimates of parameters
+#' @param bootstrap Bootstrapped estimates for parameters
+#' @param alpha Confidence level
+#' @param m Number of states
+#' @param k Number of variables
+#'
+#' @return List of lower and upper bounds for confidence intervals
+#' for each parameter
+#' @export
+#'
+#' @examples
 mvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
-  # Rows of matrix are states, columns are variables
   mu_lower <- matrix(NA, m, k)
   mu_upper <- matrix(NA, m, k)
   bootstrap_mu <- data_frame(mu = bootstrap$mu)
@@ -436,7 +505,6 @@ mvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
     }
   }
 
-  # Only want lower triangle of each sigma matrix, since is symmetric
   t <- triangular_num(k)
   mat <- matrix(c(1:(k * k)), k)
   tvect <- mat[lower.tri(mat, diag = TRUE)]

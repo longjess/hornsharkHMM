@@ -1,8 +1,21 @@
+#' Combine dynamic or static data with behavior timestamps
+#'
+#' If date and time are in same column, the data is split into separate
+#' Date and Time columns.
+#' New columns are created for Behavior and Prey info.
+#'
+#' @param data_file Name of file containing dynamic or static data
+#' @param timestamps_file Name of file containing behavior timestamps
+#' @param filename Name of new file created
+#'
+#' @return Creates new csv file with combined data.
+#' @export
+#'
+#' @examples
 get_custom_data <- function(data_file, timestamps_file, filename) {
   data <- read.csv(file = data_file)
   timestamps <- read.csv(file = timestamps_file)
 
-  # Alter and rename columns to be consistent
   if ("Date.and.Time" %in% colnames(data)) {
     data <- data %>%
       separate(col = Date.and.Time, into = c("Date", "Time"), sep = " ")
@@ -20,10 +33,8 @@ get_custom_data <- function(data_file, timestamps_file, filename) {
                                  "Time.End")] <- "Time.Stop"
   }
 
-  # Filter out rows with NA for data values
   data <- data %>% drop_na()
 
-  # Add Behavior and Prey column to main data set, based on data in timestamps
   data$Time <- chron(times = data$Time)
   timestamps$Time.Start <- chron(times = timestamps$Time.Start)
   timestamps$Time.Stop <- chron(times = timestamps$Time.Stop)
@@ -43,10 +54,18 @@ get_custom_data <- function(data_file, timestamps_file, filename) {
     )
   }
 
-  # Write to CSV
   write.csv(data, file = filename, row.names = FALSE)
 }
 
+#' Creates correlation plot
+#'
+#' @param data A dataframe
+#' @param filename Name of image file
+#'
+#' @return Saves plot as an image file
+#' @export
+#'
+#' @examples
 pairs_plot <- function(data, filename) {
   plot <- ggpairs(data,
                   lower = list(continuous = wrap("smooth", alpha = 0.2, size = 0.1)),

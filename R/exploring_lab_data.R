@@ -62,7 +62,7 @@ get_custom_data <- function(data_file, timestamps_file, filename) {
 #' @param data A dataframe
 #' @param filename Name of image file
 #'
-#' @return Saves plot as an image file
+#' @return Saves correlation plot as an image file
 #' @export
 #'
 #' @examples

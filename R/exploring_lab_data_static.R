@@ -1,3 +1,14 @@
+#' Create line plots from static data
+#'
+#' @param data A dataframe with columns Time, X_static,
+#' Y_static, Z_static
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return Image file containing line plots for X_static, Y_static, Z_static
+#' @export
+#'
+#' @examples
 line_plot_static <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_static)) +
     geom_line(colour = "dark red") +
@@ -24,6 +35,17 @@ line_plot_static <- function(data, filename) {
   ggsave(paste(filename, "static.png", sep = "_"), plot)
 }
 
+#' Create histograms from static data
+#'
+#' @param data A dataframe with columns X_static,
+#' Y_static, Z_static
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return Image file containing histograms for X_static, Y_static, Z_static
+#' @export
+#'
+#' @examples
 hist_plot_static <- function(data, filename) {
   plotx <- ggplot(data, aes(X_static)) +
     geom_histogram(colour = "dark red", fill = "salmon") +
@@ -38,6 +60,14 @@ hist_plot_static <- function(data, filename) {
   ggsave(paste(filename, "static.png", sep = "_"), plot)
 }
 
+#' Create ACF plots from static data
+#'
+#' @inheritParams hist_plot_static
+#'
+#' @return Image file containing ACF plots for X_static, Y_static, Z_static
+#' @export
+#'
+#' @examples
 acf_plot_static <- function(data, filename) {
   plotx <- ggacf(data$X_static) +
     theme_minimal()
@@ -49,6 +79,14 @@ acf_plot_static <- function(data, filename) {
   ggsave(paste(filename, "static.png", sep = "_"), plot)
 }
 
+#' Create PACF plots from static data
+#'
+#' @inheritParams hist_plot_static
+#'
+#' @return Image file containing PACF plots for X_static, Y_static, Z_static
+#' @export
+#'
+#' @examples
 pacf_plot_static <- function(data, filename) {
   plotx <- ggpacf(data$X_static) +
     theme_minimal()
@@ -60,6 +98,18 @@ pacf_plot_static <- function(data, filename) {
   ggsave(paste(filename, "static.png", sep = "_"), plot)
 }
 
+#' Create line plots from static data, which are colored by behavior
+#'
+#' @param data A dataframe with columns Time, Behavior, X_static,
+#' Y_static, Z_static
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return An image file containing line plots for X_static, Y_static, Z_static.
+#' Each line plot is colored by behavior.
+#' @export
+#'
+#' @examples
 behavior_plot_static <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_static, colour = Behavior)) +
     geom_line() +
@@ -94,6 +144,21 @@ behavior_plot_static <- function(data, filename) {
   ggsave(paste(filename, "static.png", sep = "_"), plot)
 }
 
+#' Create histograms from static data, aggregated by behavior
+#'
+#' @param data A dataframe with columns Behavior, X_static,
+#' Y_static, Z_static
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return Several image files containing histograms for
+#' X_static, Y_static, Z_static aggregated by behavior.
+#' One set of images includes histograms for all behaviors in one
+#' plot, divided by data type. Another set includes X_static, Y_static,
+#' and Z_static histograms in one image, divided by behavior.
+#' @export
+#'
+#' @examples
 filtered_hist_static <- function(data, filename) {
   plotx <- ggplot(data,
                   aes(x = X_static, colour = Behavior, fill = Behavior)) +
@@ -139,8 +204,25 @@ filtered_hist_static <- function(data, filename) {
   }
 }
 
+#' Create histograms from static data, for each behavior interval
+#'
+#' A behavior interval is a time interval in which the behavior remains
+#' constant.
+#' Each behavior interval is labelled by a number, in chronological order.
+#' Each plot contains histograms aggregating a given data type over
+#' a given behavior.
+#' If there are many behavior intervals for a given behavior, the
+#' plot may be hard to read.
+#'
+#' @inheritParams filtered_hist_static
+#'
+#' @return Several image files. Each image file contains histograms
+#' aggregating a given data type (X_static, Y_static, Z_static)
+#' over a given behavior.
+#' @export
+#'
+#' @examples
 behavior_hist_static <- function(data, filename) {
-  # Create new column indicating each subinterval of behavior
   n <- length(data$Behavior)
   indicies <- c(1, which(data$Behavior != lag(data$Behavior)), n)
   m <- length(indicies)
@@ -191,6 +273,15 @@ behavior_hist_static <- function(data, filename) {
   }
 }
 
+#' Create correlation plots of X_static, Y_static, and Z_static, divided
+#' by behavior
+#'
+#' @inheritParams filtered_hist_static
+#'
+#' @return Several image plots of correlation plots, divided by behavior
+#' @export
+#'
+#' @examples
 behavior_pairs_plot_static <- function(data, filename) {
   behaviors <- unique(data$Behavior)
   for (i in seq_len(length(behaviors))) {
@@ -208,6 +299,15 @@ behavior_pairs_plot_static <- function(data, filename) {
   }
 }
 
+#' Create multiple plots for static data
+#'
+#' @param names List of strings, containing the names used to identify the
+#' data sets
+#'
+#' @return Multiple image files
+#' @export
+#'
+#' @examples
 get_plots_static <- function(names){
   n <- length(names)
   for (i in 1:n){

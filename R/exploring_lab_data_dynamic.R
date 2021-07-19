@@ -1,3 +1,15 @@
+#' Create line plots from dynamic and ODBA data
+#'
+#' @param data A dataframe with columns Time, X_dynamic,
+#' Y_dynamic, Z_dynamic, ODBA
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return One image file containing line plots for X_dynamic, Y_dynamic, Z_dynamic,
+#' and a separate image file containing a line plot for ODBA
+#' @export
+#'
+#' @examples
 line_plot_dynamic <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_dynamic)) +
     geom_line(colour = "dark red") +
@@ -32,6 +44,18 @@ line_plot_dynamic <- function(data, filename) {
   ggsave(paste(filename, "ODBA.png", sep = "_"), plot_odba)
 }
 
+#' Create histograms from dynamic and ODBA data
+#'
+#' @param data A dataframe with columns X_dynamic,
+#' Y_dynamic, Z_dynamic, ODBA
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return One image file containing histograms for X_dynamic, Y_dynamic, Z_dynamic,
+#' and a separate image file containing a histogram for ODBA
+#' @export
+#'
+#' @examples
 hist_plot_dynamic  <- function(data, filename) {
   plotx <- ggplot(data, aes(X_dynamic)) +
     geom_histogram(colour = "dark red", fill = "salmon") +
@@ -50,6 +74,15 @@ hist_plot_dynamic  <- function(data, filename) {
   ggsave(paste(filename, "ODBA.png", sep = "_"), plot_odba)
 }
 
+#' Create ACF plots from dynamic and ODBA data
+#'
+#' @inheritParams hist_plot_dynamic
+#'
+#' @return One image file containing ACF plots for X_dynamic, Y_dynamic, Z_dynamic,
+#' and a separate image file containing an ACF plot for ODBA
+#' @export
+#'
+#' @examples
 acf_plot_dynamic <- function(data, filename) {
   plotx <- ggacf(data$X_dynamic) +
     theme_minimal()
@@ -64,6 +97,15 @@ acf_plot_dynamic <- function(data, filename) {
   ggsave(paste(filename, "ODBA.png", sep = "_"), plot_odba)
 }
 
+#' Create PACF plots from dynamic and ODBA data
+#'
+#' @inheritParams hist_plot_dynamic
+#'
+#' @return One image file containing PACF plots for X_dynamic, Y_dynamic, Z_dynamic,
+#' and a separate image file containing a PACF plot for ODBA
+#' @export
+#'
+#' @examples
 pacf_plot_dynamic  <- function(data, filename) {
   plotx <- ggpacf(data$X_dynamic) +
     theme_minimal()
@@ -79,6 +121,19 @@ pacf_plot_dynamic  <- function(data, filename) {
 }
 
 
+#' Create line plots from dynamic and ODBA data, which are colored by behavior
+#'
+#' @param data A dataframe with columns Time, Behavior, X_dynamic,
+#' Y_dynamic, Z_dynamic, ODBA
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return One image file containing line plots for X_dynamic, Y_dynamic, Z_dynamic,
+#' and a separate image file containing a line plot for ODBA. Each line plot is colored
+#' by behavior.
+#' @export
+#'
+#' @examples
 behavior_plot_dynamic  <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_dynamic, colour = Behavior)) +
     geom_line() +
@@ -123,6 +178,22 @@ behavior_plot_dynamic  <- function(data, filename) {
   ggsave(paste(filename, "ODBA.png", sep = "_"), plot_odba)
 }
 
+#' Create histograms from dynamic and ODBA data, aggregated by behavior
+#'
+#' @param data A dataframe with columns Behavior, X_dynamic,
+#' Y_dynamic, Z_dynamic, ODBA
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return Several image files containing histograms for
+#' X_dynamic, Y_dynamic, Z_dynamic, and ODBA aggregated by behavior.
+#' One set of images includes histograms for all behaviors in one
+#' plot, divided by data type. Another set includes X_dynamic, Y_dynamic,
+#' and Z_dynamic histograms in one image and ODBA histogram in another,
+#' divided by behavior.
+#' @export
+#'
+#' @examples
 filtered_hist_dynamic  <- function(data, filename) {
   plotx <- ggplot(data,
                   aes(x = X_dynamic, colour = Behavior, fill = Behavior)) +
@@ -179,8 +250,25 @@ filtered_hist_dynamic  <- function(data, filename) {
   }
 }
 
+#' Create histograms from dynamic and ODBA data, for each behavior interval
+#'
+#' A behavior interval is a time interval in which the behavior remains
+#' constant.
+#' Each behavior interval is labelled by a number, in chronological order.
+#' Each plot contains histograms aggregating a given data type over
+#' a given behavior.
+#' If there are many behavior intervals for a given behavior, the
+#' plot may be hard to read.
+#'
+#' @inheritParams filtered_hist_dynamic
+#'
+#' @return Several image files. Each image file contains histograms
+#' aggregating a given data type (X_dynamic, Y_dynamic, Z_dynamic, ODBA)
+#' over a given behavior.
+#' @export
+#'
+#' @examples
 behavior_hist_dynamic  <- function(data, filename) {
-  # Create new column indicating each subinterval of behavior
   n <- length(data$Behavior)
   indicies <- c(1, which(data$Behavior != lag(data$Behavior)), n)
   m <- length(indicies)
@@ -242,6 +330,15 @@ behavior_hist_dynamic  <- function(data, filename) {
   }
 }
 
+#' Create correlation plots of X_dynamic, Y_dynamic, and Z_dynamic,
+#' divided by behavior
+#'
+#' @inheritParams filtered_hist_dynamic
+#'
+#' @return Several image plots of correlation plots, divided by behavior
+#' @export
+#'
+#' @examples
 behavior_pairs_plot_dynamic <- function(data, filename) {
   behaviors <- unique(data$Behavior)
   for (i in seq_len(length(behaviors))) {
@@ -259,6 +356,15 @@ behavior_pairs_plot_dynamic <- function(data, filename) {
   }
 }
 
+#' Create multiple plots for dynamic and ODBA data
+#'
+#' @param names List of strings, containing the names used to identify the
+#' data sets
+#'
+#' @return Multiple image files
+#' @export
+#'
+#' @examples
 get_plots_dynamic <- function(names){
   n <- length(names)
   for (i in 1:n){
@@ -268,14 +374,14 @@ get_plots_dynamic <- function(names){
     labelled_data <- data %>% filter(!is.na(Behavior))
     dynamic_data <- data %>% select(X_dynamic, Y_dynamic, Z_dynamic)
 
-    line_plot(data, paste(name, "line_plot", sep = "_"))
-    hist_plot(data, paste(name, "histogram", sep = "_"))
-    acf_plot(data, paste(name, "acf", sep = "_"))
-    pacf_plot(data, paste(name, "pacf", sep = "_"))
-    behavior_plot(data, paste(name, "plot_behavior", sep = "_"))
-    behavior_plot(labelled_data, paste(name, "plot_behavior_filtered", sep = "_"))
-    filtered_hist(labelled_data, paste(name, "histogram_filtered", sep = "_"))
-    behavior_hist(labelled_data, paste(name, "histogram_behavior", sep = "_"))
+    line_plot_dynamic(data, paste(name, "line_plot", sep = "_"))
+    hist_plot_dynamic(data, paste(name, "histogram", sep = "_"))
+    acf_plot_dynamic(data, paste(name, "acf", sep = "_"))
+    pacf_plot_dynamic(data, paste(name, "pacf", sep = "_"))
+    behavior_plot_dynamic(data, paste(name, "plot_behavior", sep = "_"))
+    behavior_plot_dynamic(labelled_data, paste(name, "plot_behavior_filtered", sep = "_"))
+    filtered_hist_dynamic(labelled_data, paste(name, "histogram_filtered", sep = "_"))
+    behavior_hist_dynamic(labelled_data, paste(name, "histogram_behavior", sep = "_"))
     pairs_plot(dynamic_data, paste(name, "correlation_dynamic.png", sep = "_"))
     behavior_pairs_plot_dynamic(data, paste(name, "dynamic", sep = "_"))
   }

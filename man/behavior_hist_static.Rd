@@ -14,16 +14,21 @@ Y_static, Z_static}
 image files to be created}
 }
 \value{
-Several image files. Each image file contains histograms
-aggregating a given data type (X_static, Y_static, Z_static)
-over a given behavior.
+None
 }
 \description{
+Creates several image files. Each image file contains histograms
+aggregating a given data type (X_static, Y_static, Z_static)
+over each behavior interval for a given behavior.
 A behavior interval is a time interval in which the behavior remains
 constant.
 Each behavior interval is labelled by a number, in chronological order.
-Each plot contains histograms aggregating a given data type over
-a given behavior.
 If there are many behavior intervals for a given behavior, the
 plot may be hard to read.
+}
+\examples{
+filename <- "Custom_Lady_27Mar17_static.csv"
+data <- read.csv(filename)
+labelled_data <- data \%>\% filter(!is.na(Behavior))
+behavior_hist_static(labelled_data, "Lady_27Mar17_histogram_behavior")
 }

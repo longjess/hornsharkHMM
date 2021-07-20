@@ -2,7 +2,7 @@
 % Please edit documentation in R/exploring_lab_data.R
 \name{pairs_plot}
 \alias{pairs_plot}
-\title{Creates correlation plot}
+\title{Create correlation plot}
 \usage{
 pairs_plot(data, filename)
 }
@@ -12,10 +12,10 @@ pairs_plot(data, filename)
 \item{filename}{Name of image file}
 }
 \value{
-Saves correlation plot as an image file
+None
 }
 \description{
-Creates correlation plot
+Saves correlation plot as an image file.
 }
 \examples{
 filename <- "Custom_Lady_27Mar17_dynamic.csv"

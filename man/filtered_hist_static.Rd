@@ -14,12 +14,18 @@ Y_static, Z_static}
 image files to be created}
 }
 \value{
-Several image files containing histograms for
-X_static, Y_static, Z_static aggregated by behavior.
-One set of images includes histograms for all behaviors in one
-plot, divided by data type. Another set includes X_static, Y_static,
-and Z_static histograms in one image, divided by behavior.
+None
 }
 \description{
-Create histograms from static data, aggregated by behavior
+Creates several image files containing histograms for
+X_static, Y_static, Z_static aggregated by behavior.
+One set of images includes histograms for all behaviors in one
+plot, divided by data type. Another set includes X_static,
+Y_static, Z_static histograms in one image, divided by behavior.
+}
+\examples{
+filename <- "Custom_Lady_27Mar17_static.csv"
+data <- read.csv(filename)
+labelled_data <- data \%>\% filter(!is.na(Behavior))
+filtered_hist_static(labelled_data, "Lady_27Mar17_histogram_filtered")
 }

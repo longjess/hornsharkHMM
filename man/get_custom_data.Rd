@@ -14,12 +14,13 @@ get_custom_data(data_file, timestamps_file, filename)
 \item{filename}{Name of new file created}
 }
 \value{
-Creates new csv file with combined data.
+None
 }
 \description{
 If date and time are in same column, the data is split into separate
 Date and Time columns.
 New columns are created for Behavior and Prey info.
+Creates new csv file with combined data.
 }
 \examples{
 get_custom_data("Lady_27Mar17_Dynamic25Hz.csv",

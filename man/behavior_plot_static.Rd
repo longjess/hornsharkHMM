@@ -14,9 +14,16 @@ Y_static, Z_static}
 image files to be created}
 }
 \value{
-An image file containing line plots for X_static, Y_static, Z_static.
-Each line plot is colored by behavior.
+None
 }
 \description{
-Create line plots from static data, which are colored by behavior
+Creates an image file containing line plots
+for X_static, Y_static, Z_static.
+Each line plot is colored by behavior.
+}
+\examples{
+filename <- "Custom_Lady_27Mar17_static.csv"
+data <- read.csv(filename)
+labelled_data <- data \%>\% filter(!is.na(Behavior))
+behavior_plot_static(labelled_data, "Lady_27Mar17_plot_behavior")
 }

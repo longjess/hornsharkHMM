@@ -11,8 +11,14 @@ get_plots_dynamic(names)
 data sets}
 }
 \value{
-Multiple image files
+None
 }
 \description{
-Create multiple plots for dynamic and ODBA data
+Creates multiple image files, with different line plots, histograms, etc.
+}
+\examples{
+names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+"BigGuy_15Feb18", "Eliza_7Sept17",
+"Eliza_20Sept17", "Lady_27Mar17")
+get_plots_dynamic(names)
 }

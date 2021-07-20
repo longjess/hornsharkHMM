@@ -15,9 +15,13 @@ Y_static, Z_static}
 image files to be created}
 }
 \value{
-Several image plots of correlation plots, divided by behavior
+None
 }
 \description{
-Create correlation plots of X_static, Y_static, and Z_static, divided
-by behavior
+Creates several image plots of correlation plots, divided by behavior.
+}
+\examples{
+filename <- "Custom_Lady_27Mar17_static.csv"
+data <- read.csv(filename)
+behavior_pairs_plot_static(data, "Lady_27Mar17_static")
 }

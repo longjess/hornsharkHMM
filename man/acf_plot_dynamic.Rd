@@ -14,11 +14,11 @@ Y_dynamic, Z_dynamic, ODBA}
 image files to be created}
 }
 \value{
-One image file containing ACF plots for X_dynamic, Y_dynamic, Z_dynamic,
-and a separate image file containing an ACF plot for ODBA
+None
 }
 \description{
-Create ACF plots from dynamic and ODBA data
+Creates one image file containing ACF plots for X_dynamic, Y_dynamic, Z_dynamic,
+and another image file containing an ACF plot for ODBA.
 }
 \examples{
 filename <- "Custom_Lady_27Mar17_dynamic.csv"

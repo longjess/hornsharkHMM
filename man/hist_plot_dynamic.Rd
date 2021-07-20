@@ -14,11 +14,11 @@ Y_dynamic, Z_dynamic, ODBA}
 image files to be created}
 }
 \value{
-One image file containing histograms for X_dynamic, Y_dynamic, Z_dynamic,
-and a separate image file containing a histogram for ODBA
+None
 }
 \description{
-Create histograms from dynamic and ODBA data
+Creates one image file containing histograms for X_dynamic, Y_dynamic, Z_dynamic,
+and another image file containing a histogram for ODBA.
 }
 \examples{
 filename <- "Custom_Lady_27Mar17_dynamic.csv"

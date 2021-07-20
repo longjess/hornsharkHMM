@@ -14,15 +14,15 @@ Y_dynamic, Z_dynamic, ODBA}
 image files to be created}
 }
 \value{
-Several image files containing histograms for
+None
+}
+\description{
+Creates several image files containing histograms for
 X_dynamic, Y_dynamic, Z_dynamic, and ODBA aggregated by behavior.
 One set of images includes histograms for all behaviors in one
 plot, divided by data type. Another set includes X_dynamic, Y_dynamic,
 and Z_dynamic histograms in one image and ODBA histogram in another,
 divided by behavior.
-}
-\description{
-Create histograms from dynamic and ODBA data, aggregated by behavior
 }
 \examples{
 filename <- "Custom_Lady_27Mar17_dynamic.csv"

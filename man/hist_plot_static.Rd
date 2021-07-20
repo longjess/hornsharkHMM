@@ -14,8 +14,14 @@ Y_static, Z_static}
 image files to be created}
 }
 \value{
-Image file containing histograms for X_static, Y_static, Z_static
+None
 }
 \description{
-Create histograms from static data
+Creates an image file containing histograms
+for X_static, Y_static, Z_static.
+}
+\examples{
+filename <- "Custom_Lady_27Mar17_static.csv"
+data <- read.csv(filename)
+hist_plot_static(data, "Lady_27Mar17_histogram")
 }

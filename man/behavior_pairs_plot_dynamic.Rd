@@ -15,11 +15,10 @@ Y_dynamic, Z_dynamic, ODBA}
 image files to be created}
 }
 \value{
-Several image plots of correlation plots, divided by behavior
+None
 }
 \description{
-Create correlation plots of X_dynamic, Y_dynamic, and Z_dynamic,
-divided by behavior
+Creates several image plots of correlation plots, divided by behavior.
 }
 \examples{
 filename <- "Custom_Lady_27Mar17_dynamic.csv"

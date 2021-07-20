@@ -12,8 +12,14 @@ pairs_plot(data, filename)
 \item{filename}{Name of image file}
 }
 \value{
-Saves plot as an image file
+Saves correlation plot as an image file
 }
 \description{
 Creates correlation plot
+}
+\examples{
+filename <- "Custom_Lady_27Mar17_dynamic.csv"
+data <- read.csv(filename)
+dynamic_data <- data \%>\% select(X_dynamic, Y_dynamic, Z_dynamic)
+pairs_plot(dynamic_data, "Lady_27Mar17_correlation.png")
 }

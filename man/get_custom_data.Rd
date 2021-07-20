@@ -21,3 +21,8 @@ If date and time are in same column, the data is split into separate
 Date and Time columns.
 New columns are created for Behavior and Prey info.
 }
+\examples{
+get_custom_data("Lady_27Mar17_Dynamic25Hz.csv",
+"TimestampedData_Lady_27Mar17.csv",
+"Custom_Lady_27Mar17_dynamic.csv")
+}

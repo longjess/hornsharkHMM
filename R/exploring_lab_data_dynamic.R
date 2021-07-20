@@ -10,6 +10,9 @@
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' line_plot_dynamic(data, "Lady_27Mar17_line_plot")
 line_plot_dynamic <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_dynamic)) +
     geom_line(colour = "dark red") +
@@ -56,6 +59,9 @@ line_plot_dynamic <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' hist_plot_dynamic(data, "Lady_27Mar17_histogram")
 hist_plot_dynamic  <- function(data, filename) {
   plotx <- ggplot(data, aes(X_dynamic)) +
     geom_histogram(colour = "dark red", fill = "salmon") +
@@ -83,6 +89,9 @@ hist_plot_dynamic  <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' acf_plot_dynamic(data, "Lady_27Mar17_acf")
 acf_plot_dynamic <- function(data, filename) {
   plotx <- ggacf(data$X_dynamic) +
     theme_minimal()
@@ -106,6 +115,9 @@ acf_plot_dynamic <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' pacf_plot_dynamic(data, "Lady_27Mar17_pacf")
 pacf_plot_dynamic  <- function(data, filename) {
   plotx <- ggpacf(data$X_dynamic) +
     theme_minimal()
@@ -134,6 +146,10 @@ pacf_plot_dynamic  <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' behavior_plot_dynamic(labelled_data, "Lady_27Mar17_plot_behavior")
 behavior_plot_dynamic  <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_dynamic, colour = Behavior)) +
     geom_line() +
@@ -194,6 +210,10 @@ behavior_plot_dynamic  <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' filtered_hist_dynamic(labelled_data, "Lady_27Mar17_histogram_filtered")
 filtered_hist_dynamic  <- function(data, filename) {
   plotx <- ggplot(data,
                   aes(x = X_dynamic, colour = Behavior, fill = Behavior)) +
@@ -268,6 +288,10 @@ filtered_hist_dynamic  <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' behavior_hist_dynamic(labelled_data, "Lady_27Mar17_histogram_behavior")
 behavior_hist_dynamic  <- function(data, filename) {
   n <- length(data$Behavior)
   indicies <- c(1, which(data$Behavior != lag(data$Behavior)), n)
@@ -339,6 +363,9 @@ behavior_hist_dynamic  <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' behavior_pairs_plot_dynamic(data, "Lady_27Mar17_dynamic")
 behavior_pairs_plot_dynamic <- function(data, filename) {
   behaviors <- unique(data$Behavior)
   for (i in seq_len(length(behaviors))) {

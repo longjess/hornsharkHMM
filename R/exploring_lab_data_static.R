@@ -9,6 +9,7 @@
 #' @export
 #'
 #' @examples
+#'
 line_plot_static <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_static)) +
     geom_line(colour = "dark red") +

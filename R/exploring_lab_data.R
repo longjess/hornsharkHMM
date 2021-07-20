@@ -12,6 +12,9 @@
 #' @export
 #'
 #' @examples
+#' get_custom_data("Lady_27Mar17_Dynamic25Hz.csv",
+#' "TimestampedData_Lady_27Mar17.csv",
+#' "Custom_Lady_27Mar17_dynamic.csv")
 get_custom_data <- function(data_file, timestamps_file, filename) {
   data <- read.csv(file = data_file)
   timestamps <- read.csv(file = timestamps_file)
@@ -66,6 +69,10 @@ get_custom_data <- function(data_file, timestamps_file, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' dynamic_data <- data %>% select(X_dynamic, Y_dynamic, Z_dynamic)
+#' pairs_plot(dynamic_data, "Lady_27Mar17_correlation.png")
 pairs_plot <- function(data, filename) {
   plot <- ggpairs(data,
                   lower = list(continuous = wrap("smooth", alpha = 0.2, size = 0.1)),

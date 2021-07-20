@@ -3,12 +3,13 @@
 #' If date and time are in same column, the data is split into separate
 #' Date and Time columns.
 #' New columns are created for Behavior and Prey info.
+#' Creates new csv file with combined data.
 #'
 #' @param data_file Name of file containing dynamic or static data
 #' @param timestamps_file Name of file containing behavior timestamps
 #' @param filename Name of new file created
 #'
-#' @return Creates new csv file with combined data.
+#' @return None
 #' @export
 #'
 #' @examples
@@ -60,12 +61,14 @@ get_custom_data <- function(data_file, timestamps_file, filename) {
   write.csv(data, file = filename, row.names = FALSE)
 }
 
-#' Creates correlation plot
+#' Create correlation plot
+#'
+#' Saves correlation plot as an image file.
 #'
 #' @param data A dataframe
 #' @param filename Name of image file
 #'
-#' @return Saves correlation plot as an image file
+#' @return None
 #' @export
 #'
 #' @examples

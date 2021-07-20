@@ -392,6 +392,10 @@ behavior_pairs_plot_dynamic <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+#' "BigGuy_15Feb18", "Eliza_7Sept17",
+#' "Eliza_20Sept17", "Lady_27Mar17")
+#' get_plots_dynamic(names)
 get_plots_dynamic <- function(names){
   n <- length(names)
   for (i in 1:n){

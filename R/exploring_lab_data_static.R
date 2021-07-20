@@ -9,7 +9,9 @@
 #' @export
 #'
 #' @examples
-#'
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' line_plot_static(data, "Lady_27Mar17_line_plot")
 line_plot_static <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_static)) +
     geom_line(colour = "dark red") +
@@ -47,6 +49,9 @@ line_plot_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' hist_plot_static(data, "Lady_27Mar17_histogram")
 hist_plot_static <- function(data, filename) {
   plotx <- ggplot(data, aes(X_static)) +
     geom_histogram(colour = "dark red", fill = "salmon") +
@@ -69,6 +74,9 @@ hist_plot_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' acf_plot_static(data, "Lady_27Mar17_acf")
 acf_plot_static <- function(data, filename) {
   plotx <- ggacf(data$X_static) +
     theme_minimal()
@@ -88,6 +96,9 @@ acf_plot_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' pacf_plot_static(data, "Lady_27Mar17_pacf")
 pacf_plot_static <- function(data, filename) {
   plotx <- ggpacf(data$X_static) +
     theme_minimal()
@@ -111,6 +122,10 @@ pacf_plot_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' behavior_plot_static(labelled_data, "Lady_27Mar17_plot_behavior")
 behavior_plot_static <- function(data, filename) {
   plotx <- ggplot(data, aes(x = Time, y = X_static, colour = Behavior)) +
     geom_line() +
@@ -160,6 +175,10 @@ behavior_plot_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' filtered_hist_static(labelled_data, "Lady_27Mar17_histogram_filtered")
 filtered_hist_static <- function(data, filename) {
   plotx <- ggplot(data,
                   aes(x = X_static, colour = Behavior, fill = Behavior)) +
@@ -223,6 +242,10 @@ filtered_hist_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' behavior_hist_static(labelled_data, "Lady_27Mar17_histogram_behavior")
 behavior_hist_static <- function(data, filename) {
   n <- length(data$Behavior)
   indicies <- c(1, which(data$Behavior != lag(data$Behavior)), n)
@@ -283,6 +306,9 @@ behavior_hist_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_static.csv"
+#' data <- read.csv(filename)
+#' behavior_pairs_plot_static(data, "Lady_27Mar17_static")
 behavior_pairs_plot_static <- function(data, filename) {
   behaviors <- unique(data$Behavior)
   for (i in seq_len(length(behaviors))) {
@@ -309,6 +335,10 @@ behavior_pairs_plot_static <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+#' "BigGuy_15Feb18", "Eliza_7Sept17",
+#' "Eliza_20Sept17", "Lady_27Mar17")
+#' get_plots_dynamic(names)
 get_plots_static <- function(names){
   n <- length(names)
   for (i in 1:n){
@@ -326,7 +356,7 @@ get_plots_static <- function(names){
     behavior_plot_static(labelled_data, paste(name, "plot_behavior_filtered", sep = "_"))
     filtered_hist_static(labelled_data, paste(name, "histogram_filtered", sep = "_"))
     behavior_hist_static(labelled_data, paste(name, "histogram_behavior", sep = "_"))
-    pairs_plot(dynamic_data, paste(name, "correlation_static.png", sep = "_"))
+    pairs_plot(static_data, paste(name, "correlation_static.png", sep = "_"))
     behavior_pairs_plot_static(data, paste(name, "static", sep = "_"))
   }
 }

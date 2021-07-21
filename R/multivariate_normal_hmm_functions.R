@@ -97,7 +97,7 @@ mvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
 mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
   n <- ncol(x)
   pn <- mvnorm_hmm_pw2pn(m, k, parvect, stationary = stationary)
-  p <- mvnorm_densities2(x, pn, m, n)
+  p <- mvnorm_densities(x, pn, m, k, n)
   foo <- matrix(pn$delta, ncol = m)
   lscale <- foralg(n, m, foo, pn$gamma, p)
   mllk <- -lscale
@@ -115,7 +115,7 @@ mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
 #' @export
 #'
 #' @examples
-mvnorm_densities <- function(x, mod, m, n) {
+mvnorm_densities <- function(x, mod, m, k, n) {
   p <- matrix(nrow = n, ncol = m)
   cores <- detectCores()
   for (i in 1:n) {
@@ -228,12 +228,11 @@ mvnorm_hmm_sample_one <- function(state, mod) {
 mvnorm_hmm_viterbi <- function(x, mod) {
   n <- ncol(x)
   xi <- matrix(0, n, mod$m)
-  p <- mvnorm_densities(x[, 1], mod, mod$m)
-  foo <- mod$delta * p
+  p <- mvnorm_densities(x[, 1], mod, mod$m, mod$k, n)
+  foo <- mod$delta * p[1, ]
   xi[1, ] <- foo / sum(foo)
   for (t in 2:n) {
-    p <- mvnorm_densities(x[, t], mod, mod$m)
-    foo <- apply(xi[t - 1, ] * mod$gamma, 2, max) * p
+    foo <- apply(xi[t - 1, ] * mod$gamma, 2, max) * p[t, ]
     xi[t, ] <- foo / sum(foo)
   }
   iv <- numeric(n)
@@ -255,13 +254,14 @@ mvnorm_hmm_viterbi <- function(x, mod) {
 mvnorm_hmm_lforward <- function(x, mod) {
   n <- ncol(x)
   lalpha <- matrix(NA, mod$m, n)
-  foo <- mod$delta * mvnorm_densities(x[, 1], mod, mod$m)
+  p <- mvnorm_densities(x, mod, mod$m, mod$k, n)
+  foo <- mod$delta * p[1, ]
   sumfoo <- sum(foo)
   lscale <- log(sumfoo)
   foo <- foo / sumfoo
   lalpha[, 1] <- lscale + log(foo)
   for (i in 2:n) {
-    foo <- foo %*% mod$gamma * mvnorm_densities(x[, i], mod, mod$m)
+    foo <- foo %*% mod$gamma * p[i, ]
     sumfoo <- sum(foo)
     lscale <- lscale + log(sumfoo)
     foo <- foo / sumfoo
@@ -281,12 +281,13 @@ mvnorm_hmm_lforward <- function(x, mod) {
 mvnorm_hmm_lbackward <- function(x, mod) {
   n <- ncol(x)
   m <- mod$m
+  p <- mvnorm_densities(x, mod, mod$m, mod$k, n)
   lbeta <- matrix(NA, m, n)
   lbeta[, n] <- rep(0, m)
   foo <- rep(1 / m, m)
   lscale <- log(m)
   for (i in (n - 1):1) {
-    foo <- mod$gamma %*% (mvnorm_densities(x[, i + 1], mod, mod$m) * foo)
+    foo <- mod$gamma %*% (p[, i + 1] * foo)
     lbeta[, i] <- log(foo) + lscale
     sumfoo <- sum(foo)
     foo <- foo / sumfoo
@@ -318,7 +319,7 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
     lb <- mvnorm_hmm_lbackward(x, mod)
     lafact <- apply(la, 2, max)
     lbfact <- apply(lb, 2, max)
-    p <- mvnorm_dist_mat(x, mod)
+    p <- mvnorm_dist_mat(x, mod, n)
     npsr <- rep(NA, n)
     npsr[1] <- qnorm(delta %*% p[1, ])
     for (i in 2:n) {
@@ -333,7 +334,7 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
   else if (type == "forecast") {
     n <- ncol(x)
     la <- mvnorm_hmm_lforward(x, mod)
-    p <- mvnorm_dist_mat(x, mod)
+    p <- mvnorm_dist_mat(x, mod, n)
     npsr <- rep(NA, n)
     npsr[1] <- qnorm(delta %*% p[1, ])
     for (i in 2:n) {
@@ -388,7 +389,7 @@ mvnorm_inv_hessian <- function(mod, stationary = TRUE){
     h <- mod$hessian
   }
   h <- solve(h)
-  jacobian <- norm_jacobian(mod, np2)
+  jacobian <- mvnorm_jacobian(mod, np2)
   h <- t(jacobian) %*% h %*% jacobian
   return(h)
 }

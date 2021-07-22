@@ -466,7 +466,7 @@ mar_inv_hessian <- function(mod, stationary = TRUE){
     h <- mod$hessian
   }
   h <- solve(h)
-  jacobian <- norm_jacobian(mod, np2)
+  jacobian <- mar_jacobian(mod, np2)
   h <- t(jacobian) %*% h %*% jacobian
   return(h)
 }

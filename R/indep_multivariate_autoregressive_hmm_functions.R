@@ -48,7 +48,7 @@ inmar_hmm_generate_sample <- function(ns, mod) {
   x <- matrix(nrow = mod$k, ncol = ns)
   for (i in 1:ns) {
     mean <- get_inmar_mean(mod$mu, mod$phi, x, mod$m, mod$q, mod$k, i)
-    x[, i] <- rmvnorm(1, mean = mean[[state[i]]], sigma = diag(mod$sigma[[state[i]]]))
+    x[, i] <- rmvnorm(1, mean = mean[[state[i]]], sigma = diag(mod$sigma[[state[i]]]^2))
   }
   return(list(index = c(1:ns), state = state, obs = x))
 }
@@ -275,7 +275,7 @@ inmar_dist_mat <- function(x, mod, n) {
     for (j in 1:mod$m) {
       p[i, j] <- pmvnorm(
         lower = rep(-Inf, mod$k), upper = x[, i],
-        mean = means[[j]][i, ], sigma = diag(mod$sigma[[j]])
+        mean = means[[j]][i, ], sigma = diag(mod$sigma[[j]]^2)
       )
     }
   }

@@ -354,7 +354,7 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
 #' @export
 #'
 #' @examples
-mvnorm_dist_mat <- function(x, mod) {
+mvnorm_dist_mat <- function(x, mod, n) {
   p <- matrix(NA, n, mod$m)
   for (i in 1:n) {
     for (j in 1:m) {

@@ -225,7 +225,7 @@ inmvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
     for (i in 2:n) {
       la_max <- max(la[, i - 1])
       a <- exp(la[, i - 1] - la_max)
-      npsr[i] <- qnorm(t(a) %*% (gamma / sum(a)) %*% p[i, ])
+      npsr[i] <- qnorm(t(a) %*% (mod$gamma / sum(a)) %*% p[i, ])
     }
     return(data_frame(npsr, index = c(1:n)))
   }

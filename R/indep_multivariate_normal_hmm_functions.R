@@ -1,3 +1,21 @@
+#' Transform independent multivariate normal natural parameters to working parameters
+#'
+#' mu does not need to be transformed, as there are no constraints.
+#'
+#' @param m Number of states
+#' @param mu List of vectors of length m, means for each
+#' state dependent multivariate normal distribution
+#' @param sigma List of vectors of length m, standard deviations
+#' for each state dependent multivariate normal distribution
+#' @param gamma Transition probabiilty matrix, size m x m
+#' @param delta Optional, vector of length m containing
+#' initial distribution
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
                                delta = NULL, stationary = TRUE) {
   tmu <- unlist(mu, use.names = FALSE)
@@ -5,7 +23,7 @@ inmvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
   foo <- log(gamma / diag(gamma))
   tgamma <- as.vector(foo[!diag(m)])
   if (stationary) {
-    tdelta <- NULL
+    tdelta <- NULLlibrary(de)
   }
   else {
     tdelta <- log(delta[-1] / delta[1])
@@ -14,8 +32,16 @@ inmvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
   return(parvect)
 }
 
-
-# Transform normal working parameters to natural parameters
+#' Transform multivariate normal working parameters to natural parameters
+#'
+#' @param k Number of variables
+#' @param parvect Vector of working parameters
+#' @inheritParams inmvnorm_hmm_pn2pw
+#'
+#' @return List of natural parameters
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
   mu <- list()
   count <- 1
@@ -47,7 +73,15 @@ inmvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
   return(list(mu = mu, sigma = sigma, gamma = gamma, delta = delta))
 }
 
-# Computing minus the log-likelihood from the working parameters
+#' Get negative log-likelihood from the working parameters
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @inheritParams inmvnorm_hmm_pw2pn
+#'
+#' @return Negative log-likelihood
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
   n <- ncol(x)
   pn <- inmvnorm_hmm_pw2pn(m, k, parvect, stationary = stationary)
@@ -58,7 +92,18 @@ inmvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
   return(mllk)
 }
 
-# Returns n * m matrix of state dependent probability densities
+#' Get matrix of state dependent probability densities
+#'
+#' @param x Vector containing one observation
+#' @param mod List of parameters
+#' @param k Number of variables
+#' @param m Number of states
+#' @param n Number of observations
+#'
+#' @return n x m matrix of state dependent probability densities
+#' @export
+#'
+#' @examples
 inmvnorm_densities <- function(x, mod, m, k, n) {
   p <- matrix(1, nrow = n, ncol = m)
   for (i in 1:n) {
@@ -71,7 +116,25 @@ inmvnorm_densities <- function(x, mod, m, k, n) {
   return(p)
 }
 
-# Computing MLE from natural parameters
+
+#' Maximum likelihood estimation of multivariate normal parameters
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @param m Number of states
+#' @param k Number of variables
+#' @param mu0 List of vectors of length m, initial values for means
+#' @param sigma0 List of vectors of length m,
+#' initial values for standard deviations
+#' @param gamma0 Initial values for ransition probabiilty matrix, size m x m
+#' @param delta0 Optional, vector of length m containing initial values
+#' initial distribution
+#' @param stationary Boolean, whether the HMM is stationary or not
+#' @param hessian Boolean, whether to return the inverse hessian
+#'
+#' @return List of results
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
                              stationary = TRUE, hessian = FALSE) {
   parvect0 <- inmvnorm_hmm_pn2pw(
@@ -111,8 +174,17 @@ inmvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
   }
 }
 
-# Generating a sample from normal distributions
-# x is a m x ns matrix
+#' Generate samples from HMM with independent multivariate normal distribution
+#'
+#' @param ns Number of samples
+#' @param mod List of model parameters
+#'
+#' @return List including vector of indices, vector of states,
+#' and k x ns matrix containing generated samples
+#' (where k is the number of variables)
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_generate_sample <- function(ns, mod) {
   mvect <- 1:mod$m
   state <- numeric(ns)
@@ -126,12 +198,30 @@ inmvnorm_hmm_generate_sample <- function(ns, mod) {
   return(list(index = c(1:ns), state = state, obs = x))
 }
 
+#' Generate one sample from HMM with independent multivariate normal distribution
+#'
+#' @param state State the HMM is in
+#' @param mod List of parameters
+#'
+#' @return Vector containing generated sample
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_sample_one <- function(state, mod) {
   x <- rmvnorm(1, mean = mod$mu[[state]], sigma = diag(mod$sigma[[state]]^2))
   return(x)
 }
 
-# Global decoding by the Viterbi algorithm
+
+#' Global decoding of states
+#'
+#' @param x Matrix of observations, rows represent each variable
+#' @param mod List of maximum likelihood estimation results
+#'
+#' @return Dataframe of decoded states and index
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_viterbi <- function(x, mod) {
   n <- ncol(x)
   xi <- matrix(0, n, mod$m)
@@ -150,7 +240,14 @@ inmvnorm_hmm_viterbi <- function(x, mod) {
   return(data_frame(index = 1:n, state = iv))
 }
 
-# Computing log(forward probabilities) for normal distribution
+#' Get forward probabilities
+#'
+#' @inheritParams inmvnorm_hmm_viterbi
+#'
+#' @return Matrix of forward probabilities
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_lforward <- function(x, mod) {
   n <- ncol(x)
   lalpha <- matrix(NA, mod$m, n)
@@ -170,7 +267,15 @@ inmvnorm_hmm_lforward <- function(x, mod) {
   return(lalpha)
 }
 
-# Computing log(backward probabilities) for normal distribution
+
+#' Get backward probabilities
+#'
+#' @inheritParams inmvnorm_hmm_viterbi
+#'
+#' @return Matrix of backward probabilities
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_lbackward <- function(x, mod) {
   n <- ncol(x)
   m <- mod$m
@@ -189,8 +294,17 @@ inmvnorm_hmm_lbackward <- function(x, mod) {
   return(lbeta)
 }
 
-# Normal pseudo-residuals for Normal HMM
-# Type can be "ordinary" or "forecast"
+
+#' Generate pseudo residuals
+#'
+#' @inheritParams inmvnorm_hmm_viterbi
+#' @param type Type of pseudo-residual, either "ordinary" or "forecast"
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Dataframe of pseudo-residuals, observations, index
+#' @export
+#'
+#' @examples
 inmvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
   if (stationary) {
     delta <- solve(t(diag(mod$m) - mod$gamma + 1), rep(1, mod$m))
@@ -231,7 +345,14 @@ inmvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
   }
 }
 
-# Get multivariate normal distribution given mod and x
+#' Get multivariate normal distribution function
+#'
+#' @inheritParams inmvnorm_hmm_viterbi
+#' @param n Number of observations
+#'
+#' @return Matrix of multivariate normal probabilities
+#'
+#' @examples
 inmvnorm_dist_mat <- function(x, mod, n) {
   p <- matrix(NA, n, mod$m)
   for (i in 1:n) {
@@ -245,6 +366,20 @@ inmvnorm_dist_mat <- function(x, mod, n) {
   return(p)
 }
 
+#' Get inverse of hessian matrix
+#'
+#' Transform hessian associated with working parameters
+#' outputted by nlm.
+#' If not stationary, exclude values associated with delta parameter
+#' from the hessian matrix.
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return Inverse hessian matrix
+#' @export
+#'
+#' @examples
 inmvnorm_inv_hessian <- function(mod, stationary = TRUE){
   if (!stationary) {
     np2 <- mod$np - mod$m + 1
@@ -260,18 +395,22 @@ inmvnorm_inv_hessian <- function(mod, stationary = TRUE){
   return(h)
 }
 
-
-# Jacobian matrix for parameters
-# n should be total number of parameters estimated, excluding delta
+#' Get Jacobian matrix
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Total number of working parameters (excluding delta)
+#'
+#' @return Jacobian matrix
+#' @export
+#'
+#' @examples
 inmvnorm_jacobian <- function(mod, n) {
   m <- mod$m
   k <- mod$k
   jacobian <- matrix(0, nrow = n, ncol = n)
-  # Jacobian for mu only is a m*k identity matrix
   jacobian[1:(m * k), 1:(m * k)] <- diag(m * k)
   sigma <- unlist(mod$sigma, use.names = FALSE)
   jacobian[(m * k + 1):(2 * m * k), (m * k + 1):(2 * m * k)] <- diag(sigma)
-  # count is the row at which the current parameter's derivatives are placed
   rowcount <- 2 * m * k + 1
   colcount <- rowcount
   for (i in 1:m) {
@@ -289,7 +428,19 @@ inmvnorm_jacobian <- function(mod, n) {
   return(jacobian)
 }
 
-# Bootstrapping estimates
+
+#' Get bootstrapped estimates of parameters
+#'
+#' @param mod List of maximum likelihood estimation results
+#' @param n Number of bootstrap samples
+#' @param k Number of variables
+#' @param len Number of observations
+#' @param stationary Boolean, whether the HMM is stationary or not
+#'
+#' @return List of estimates
+#' @export
+#'
+#' @examples
 inmvnorm_bootstrap_estimates <- function(mod, n, k, len, stationary) {
   m <- mod$m
   mu_estimate <- numeric(n * m * k)
@@ -315,8 +466,20 @@ inmvnorm_bootstrap_estimates <- function(mod, n, k, len, stationary) {
   ))
 }
 
+#' Confidence intervals for estimated parameters by bootstrapping
+#'
+#' @param mod Maximum likelihood estimates of parameters
+#' @param bootstrap Bootstrapped estimates for parameters
+#' @param alpha Confidence level
+#' @param m Number of states
+#' @param k Number of variables
+#'
+#' @return List of lower and upper bounds for confidence intervals
+#' for each parameter
+#' @export
+#'
+#' @examples
 inmvnorm_bootstrap_ci <- function(mod, bootstrap, alpha, m, k) {
-  # Rows of matrix are states, columns are variables
   mu_lower <- matrix(NA, m, k)
   mu_upper <- matrix(NA, m, k)
   bootstrap_mu <- data_frame(mu = bootstrap$mu)

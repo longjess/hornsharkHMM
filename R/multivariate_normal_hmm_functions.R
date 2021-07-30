@@ -108,6 +108,7 @@ mvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
 #'
 #' @param x Vector containing one observation
 #' @param mod List of parameters
+#' @param k Number of variables
 #' @param m Number of states
 #' @param n Number of observations
 #'
@@ -178,7 +179,7 @@ mvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
   }
 }
 
-#'Generate samples from HMM with multivariate normal distribution
+#' Generate samples from HMM with multivariate normal distribution
 #'
 #' @param ns Number of samples
 #' @param mod List of model parameters
@@ -349,6 +350,8 @@ mvnorm_hmm_pseudo_residuals <- function(x, mod, type, stationary = TRUE) {
 #' Get multivariate normal distribution function
 #'
 #' @inheritParams mvnorm_hmm_viterbi
+#' @param n Number of observations
+#'
 #'
 #' @return Matrix of multivariate normal probabilities
 #' @export

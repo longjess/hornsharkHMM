@@ -197,7 +197,6 @@ inmar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE) {
   return(mllk)
 }
 
-
 #' Get matrix of state dependent probability densities
 #'
 #' @inheritParams inmar_hmm_mllk

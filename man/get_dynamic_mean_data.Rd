@@ -7,7 +7,8 @@
 get_dynamic_mean_data(old_filename, filename)
 }
 \arguments{
-\item{old_filename}{Name of csv file containing dynamic data}
+\item{old_filename}{Name of csv file containing dynamic data. Must have
+columns Time, X_dynamic, Y_dynamic, Z_dynamic, Behavior, Prey.}
 
 \item{filename}{Name of new csv file containing means}
 }
@@ -16,4 +17,9 @@ None
 }
 \description{
 Means are taken every second (25 data points).
+}
+\examples{
+old_filename <- "Custom_BigDaddy_3Apr17_dynamic.csv"
+filename <- "Mean_BigDaddy_3Apr17_dynamic.csv"
+get_dynamic_mean_data(old_filename, filename)
 }

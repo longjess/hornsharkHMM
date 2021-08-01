@@ -2,13 +2,17 @@
 #'
 #' Means are taken every second (25 data points).
 #'
-#' @param old_filename Name of csv file containing dynamic data
+#' @param old_filename Name of csv file containing dynamic data. Must have
+#' columns Time, X_dynamic, Y_dynamic, Z_dynamic, Behavior, Prey.
 #' @param filename Name of new csv file containing means
 #'
 #' @return None
 #' @export
 #'
 #' @examples
+#' old_filename <- "Custom_BigDaddy_3Apr17_dynamic.csv"
+#' filename <- "Mean_BigDaddy_3Apr17_dynamic.csv"
+#' get_dynamic_mean_data(old_filename, filename)
 get_dynamic_mean_data <- function(old_filename, filename) {
   old_data <- read.csv(file = old_filename)
 
@@ -28,13 +32,17 @@ get_dynamic_mean_data <- function(old_filename, filename) {
 #'
 #' Means are taken every second (25 data points).
 #'
-#' @param old_filename Name of csv file containing static data
+#' @param old_filename Name of csv file containing static data. Must have
+#' columns Time, X_static, Y_static, Z_static, Behavior, Prey.
 #' @param filename Name of new csv file containing means
 #'
 #' @return
 #' @export
 #'
 #' @examples
+#' old_filename <- "Custom_BigDaddy_3Apr17_static.csv"
+#' filename <- "Mean_BigDaddy_3Apr17_static.csv"
+#' get_static_mean_data(old_filename, filename)
 get_static_mean_data <- function(old_filename, filename) {
   old_data <- read.csv(file = old_filename)
 
@@ -57,6 +65,10 @@ get_static_mean_data <- function(old_filename, filename) {
 #' @export
 #'
 #' @examples
+#' names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+#' "BigGuy_15Feb18", "Eliza_7Sept17",
+#' "Eliza_20Sept17", "Lady_27Mar17")
+#' get_all_mean_plots(names)
 get_all_mean_data <- function(names) {
   n <- length(names)
   for (i in 1:n){
@@ -83,6 +95,10 @@ get_all_mean_data <- function(names) {
 #' @export
 #'
 #' @examples
+#' names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+#' "BigGuy_15Feb18", "Eliza_7Sept17",
+#' "Eliza_20Sept17", "Lady_27Mar17")
+#' get_dynamic_mean_plots(names)
 get_dynamic_mean_plots <- function(names){
   n <- length(names)
   for (i in 1:n){
@@ -116,6 +132,10 @@ get_dynamic_mean_plots <- function(names){
 #' @export
 #'
 #' @examples
+#' names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+#' "BigGuy_15Feb18", "Eliza_7Sept17",
+#' "Eliza_20Sept17", "Lady_27Mar17")
+#' get_static_mean_plots(names)
 get_static_mean_plots <- function(names){
   n <- length(names)
   for (i in 1:n){
@@ -149,6 +169,10 @@ get_static_mean_plots <- function(names){
 #' @export
 #'
 #' @examples
+#' names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+#' "BigGuy_15Feb18", "Eliza_7Sept17",
+#' "Eliza_20Sept17", "Lady_27Mar17")
+#' get_log_odba_mean_plots(names)
 get_log_odba_mean_plots <- function(names){
   n <- length(names)
   for (i in 1:n){

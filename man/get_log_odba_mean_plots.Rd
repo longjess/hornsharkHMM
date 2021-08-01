@@ -16,3 +16,9 @@ None
 \description{
 Creates multiple image files, with different line plots, histograms, etc.
 }
+\examples{
+names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+"BigGuy_15Feb18", "Eliza_7Sept17",
+"Eliza_20Sept17", "Lady_27Mar17")
+get_log_odba_mean_plots(names)
+}

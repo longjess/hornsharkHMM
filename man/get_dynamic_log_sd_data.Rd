@@ -7,7 +7,8 @@
 get_dynamic_log_sd_data(old_filename, filename)
 }
 \arguments{
-\item{old_filename}{Name of csv file containing dynamic data}
+\item{old_filename}{Name of csv file containing dynamic data. Must have
+columns Time, X_dynamic, Y_dynamic, Z_dynamic, Behavior, Prey.}
 
 \item{filename}{Name of new csv file containing log standard deviations}
 }
@@ -16,4 +17,9 @@ None
 }
 \description{
 Log standard deviations are taken every second (25 data points).
+}
+\examples{
+old_filename <- "Custom_BigDaddy_3Apr17_dynamic.csv"
+filename <- "Mean_BigDaddy_3Apr17_dynamic.csv"
+get_dynamic_log_sd_data(old_filename, filename)
 }

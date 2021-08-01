@@ -7,7 +7,8 @@
 get_static_log_sd_data(old_filename, filename)
 }
 \arguments{
-\item{old_filename}{Name of csv file containing static data}
+\item{old_filename}{Name of csv file containing static data. Must have
+columns Time, X_static, Y_static, Z_static, Behavior, Prey.}
 
 \item{filename}{Name of new csv file containing standard deviations}
 }
@@ -16,4 +17,9 @@ get_static_log_sd_data(old_filename, filename)
 }
 \description{
 Log standard deviations are taken every second (25 data points).
+}
+\examples{
+old_filename <- "Custom_BigDaddy_3Apr17_static.csv"
+filename <- "Mean_BigDaddy_3Apr17_static.csv"
+get_static_log_sd_data(old_filename, filename)
 }

@@ -58,6 +58,9 @@ hist_plot_log_odba <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' acf_plot_log_odba(data, "Lady_27Mar17_acf")
 acf_plot_log_odba<- function(data, filename) {
   plot <- ggacf(log(data$ODBA)) +
     theme_minimal()
@@ -74,6 +77,9 @@ acf_plot_log_odba<- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' pacf_plot_log_odba(data, "Lady_27Mar17_pacf")
 pacf_plot_log_odba<- function(data, filename) {
   plot <- ggpacf(log(data$ODBA)) +
     theme_minimal()
@@ -93,6 +99,10 @@ pacf_plot_log_odba<- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' behavior_plot_log_odba(labelled_data, "Lady_27Mar17_plot_behavior")
 behavior_plot_log_odba <- function(data, filename) {
   n <- length(data$Date)
   plot <- ggplot(data, aes(x = Time, y = log(ODBA), colour = Behavior, group = 1)) +
@@ -123,6 +133,10 @@ behavior_plot_log_odba <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' filtered_hist_log_odba(labelled_data, "Lady_27Mar17_histogram_filtered")
 filtered_hist_log_odba<- function(data, filename) {
   plot <- ggplot(data, aes(x = log(ODBA), colour = Behavior, fill = Behavior)) +
     geom_histogram() +
@@ -160,6 +174,10 @@ filtered_hist_log_odba<- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' labelled_data <- data %>% filter(!is.na(Behavior))
+#' behavior_hist_log_odba(labelled_data, "Lady_27Mar17_histogram_behavior")
 behavior_hist_log_odba <- function(data, filename) {
   n <- length(data$Behavior)
   indicies <- c(1, which(data$Behavior != lag(data$Behavior)), n)
@@ -200,6 +218,10 @@ behavior_hist_log_odba <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+#' "BigGuy_15Feb18", "Eliza_7Sept17",
+#' "Eliza_20Sept17", "Lady_27Mar17")
+#' get_plots_dynamic(names)
 get_plots_log_odba <- function(names){
   n <- length(names)
   for (i in 1:n){

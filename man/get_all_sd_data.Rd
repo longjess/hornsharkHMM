@@ -15,3 +15,9 @@ None
 \description{
 Create multiple files containing dynamic and static standard deviation data
 }
+\examples{
+names <- c("BigDaddy_3Apr17", "BigDaddy_20Mar17",
+"BigGuy_15Feb18", "Eliza_7Sept17",
+"Eliza_20Sept17", "Lady_27Mar17")
+get_all_sd_data(names)
+}

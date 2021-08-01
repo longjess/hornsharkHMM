@@ -21,3 +21,9 @@ log ODBA, aggregated by behavior. One image includes histograms
 for all behaviors in one plot. The remaining images contain a histogram
 for log ODBA for a single behavior.
 }
+\examples{
+filename <- "Custom_Lady_27Mar17_dynamic.csv"
+data <- read.csv(filename)
+labelled_data <- data \%>\% filter(!is.na(Behavior))
+filtered_hist_log_odba(labelled_data, "Lady_27Mar17_histogram_filtered")
+}

@@ -18,3 +18,8 @@ None
 \description{
 Creates image file containing an ACF plot for log ODBA.
 }
+\examples{
+filename <- "Custom_Lady_27Mar17_dynamic.csv"
+data <- read.csv(filename)
+acf_plot_log_odba(data, "Lady_27Mar17_acf")
+}

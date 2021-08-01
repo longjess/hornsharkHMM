@@ -18,3 +18,8 @@ None
 \description{
 Creates image file containing a PACF plot for log ODBA.
 }
+\examples{
+filename <- "Custom_Lady_27Mar17_dynamic.csv"
+data <- read.csv(filename)
+pacf_plot_log_odba(data, "Lady_27Mar17_pacf")
+}

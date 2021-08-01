@@ -19,3 +19,9 @@ None
 Creates image file containing a line plot for log ODBA, colored
 by behavior.
 }
+\examples{
+filename <- "Custom_Lady_27Mar17_dynamic.csv"
+data <- read.csv(filename)
+labelled_data <- data \%>\% filter(!is.na(Behavior))
+behavior_plot_log_odba(labelled_data, "Lady_27Mar17_plot_behavior")
+}

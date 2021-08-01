@@ -24,3 +24,9 @@ Each behavior interval is labelled by a number, in chronological order.
 If there are many behavior intervals for a given behavior, the
 plot may be hard to read.
 }
+\examples{
+filename <- "Custom_Lady_27Mar17_dynamic.csv"
+data <- read.csv(filename)
+labelled_data <- data \%>\% filter(!is.na(Behavior))
+behavior_hist_log_odba(labelled_data, "Lady_27Mar17_histogram_behavior")
+}

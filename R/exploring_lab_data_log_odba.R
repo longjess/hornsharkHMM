@@ -9,7 +9,9 @@
 #' @return None
 #' @export
 #'
-#' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' line_plot_log_odba(data, "Lady_27Mar17_line_plot")
 line_plot_log_odba <- function(data, filename) {
   n <- length(data$Date)
   plot <- ggplot(data, aes(x = Time, y = log(ODBA), group = 1)) +
@@ -36,6 +38,9 @@ line_plot_log_odba <- function(data, filename) {
 #' @export
 #'
 #' @examples
+#' filename <- "Custom_Lady_27Mar17_dynamic.csv"
+#' data <- read.csv(filename)
+#' hist_plot_log_odba(data, "Lady_27Mar17_histogram")
 hist_plot_log_odba <- function(data, filename) {
   plot <- ggplot(data, aes(log(ODBA))) +
     geom_histogram(colour = "dark red", fill = "salmon") +

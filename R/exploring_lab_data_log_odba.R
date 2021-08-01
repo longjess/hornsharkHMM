@@ -23,6 +23,19 @@ line_plot_log_odba <- function(data, filename) {
   ggsave(paste(filename, "log_ODBA.png", sep = "_"), plot)
 }
 
+#' Create histogram from log ODBA data
+#'
+#' Creates image file containing a histogram for log ODBA.
+#'
+#'
+#' @param data A dataframe with column ODBA
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return None
+#' @export
+#'
+#' @examples
 hist_plot_log_odba <- function(data, filename) {
   plot <- ggplot(data, aes(log(ODBA))) +
     geom_histogram(colour = "dark red", fill = "salmon") +
@@ -30,18 +43,51 @@ hist_plot_log_odba <- function(data, filename) {
   ggsave(paste(filename, "log_ODBA.png", sep = "_"), plot)
 }
 
+#' Create ACF plots from log ODBA data
+#'
+#' Creates image file containing an ACF plot for log ODBA.
+#'
+#' @inheritParams hist_plot_log_odba
+#'
+#' @return None
+#' @export
+#'
+#' @examples
 acf_plot_log_odba<- function(data, filename) {
   plot <- ggacf(log(data$ODBA)) +
     theme_minimal()
   ggsave(paste(filename, "log_ODBA.png", sep = "_"), plot)
 }
 
+#' Create PACF plots from log ODBA data
+#'
+#' Creates image file containing a PACF plot for log ODBA.
+#'
+#' @inheritParams hist_plot_log_odba
+#'
+#' @return None
+#' @export
+#'
+#' @examples
 pacf_plot_log_odba<- function(data, filename) {
   plot <- ggpacf(log(data$ODBA)) +
     theme_minimal()
   ggsave(paste(filename, "log_ODBA.png", sep = "_"), plot)
 }
 
+#' Create line plots from log ODBA data, which are colored by behavior
+#'
+#' Creates image file containing a line plot for log ODBA, colored
+#' by behavior.
+#'
+#' @param data A dataframe with columns Time, Behavior, ODBA
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return None
+#' @export
+#'
+#' @examples
 behavior_plot_log_odba <- function(data, filename) {
   n <- length(data$Date)
   plot <- ggplot(data, aes(x = Time, y = log(ODBA), colour = Behavior, group = 1)) +
@@ -57,6 +103,21 @@ behavior_plot_log_odba <- function(data, filename) {
   ggsave(paste(filename, "log_ODBA.png", sep = "_"), plot)
 }
 
+#' Create histograms from log ODBA data, aggregated by behavior
+#'
+#' Creates several image files containing histograms for
+#' log ODBA, aggregated by behavior. One image includes histograms
+#' for all behaviors in one plot. The remaining images contain a histogram
+#' for log ODBA for a single behavior.
+#'
+#' @param data A dataframe with columns Behavior, ODBA
+#' @param filename String containing the first part of filename for the
+#' image files to be created
+#'
+#' @return None
+#' @export
+#'
+#' @examples
 filtered_hist_log_odba<- function(data, filename) {
   plot <- ggplot(data, aes(x = log(ODBA), colour = Behavior, fill = Behavior)) +
     geom_histogram() +
@@ -78,6 +139,22 @@ filtered_hist_log_odba<- function(data, filename) {
   }
 }
 
+#' Create histograms from log ODBA data, for each behavior interval
+#'
+#' Each image file contains histograms aggregating log ODBA
+#' over each behavior interval for a given behavior.
+#' A behavior interval is a time interval in which the behavior remains
+#' constant.
+#' Each behavior interval is labelled by a number, in chronological order.
+#' If there are many behavior intervals for a given behavior, the
+#' plot may be hard to read.
+#'
+#' @inheritParams filtered_hist_log_odba
+#'
+#' @return None
+#' @export
+#'
+#' @examples
 behavior_hist_log_odba <- function(data, filename) {
   n <- length(data$Behavior)
   indicies <- c(1, which(data$Behavior != lag(data$Behavior)), n)
@@ -107,6 +184,17 @@ behavior_hist_log_odba <- function(data, filename) {
   }
 }
 
+#' Create multiple plots for log ODBA data
+#'
+#' Creates multiple image files, with different line plots, histograms, etc.
+#'
+#' @param names List of strings, containing the names used to identify the
+#' data sets
+#'
+#' @return None
+#' @export
+#'
+#' @examples
 get_plots_log_odba <- function(names){
   n <- length(names)
   for (i in 1:n){

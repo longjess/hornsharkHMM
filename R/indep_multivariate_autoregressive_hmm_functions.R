@@ -187,10 +187,17 @@ inmar_hmm_pw2pn <- function(m, q, k, parvect, stationary = TRUE) {
 #' @export
 #'
 #' @examples
-inmar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE) {
+inmar_hmm_mllk <- function(parvect, x, m, q, k, stationary = TRUE, state = NULL) {
   n <- ncol(x)
   pn <- inmar_hmm_pw2pn(m, q, k, parvect, stationary = stationary)
-  p <- inmar_densities(x, pn, m, q, k, n)
+
+  if (is.null(state)){
+    p <- inmar_densities(x, pn, m, q, k, n)
+  }
+  else {
+    p <- inmar_densities_labelled(x, pn, m, q, k, n, state)
+  }
+
   foo <- matrix(pn$delta, ncol = m)
   lscale <- foralg(n, m, foo, pn$gamma, p)
   mllk <- -lscale
@@ -220,6 +227,23 @@ inmar_densities <- function(x, mod, m, q, k, n) {
   return(p)
 }
 
+inmar_densities_labelled <- function(x, mod, m, q, k, n, state) {
+  p <- matrix(1, nrow = n, ncol = m)
+  means <- get_all_inmar_means(x, mod, m, q, k)
+  for (i in 1:n) {
+    for (j in 1:m) {
+      if (j == state[i]){
+        for (l in 1:k){
+          p[i, j] <- p[i, j] * dnorm(x[l, i], means[[j]][i, l], mod$sigma[[j]][l])
+        }
+      }
+      else{
+        p[i, j] <- 0
+      }
+    }
+  }
+  return(p)
+}
 
 #' Maximum likelihood estimation of multivariate normal parameters
 #'
@@ -240,13 +264,16 @@ inmar_densities <- function(x, mod, m, q, k, n) {
 #'
 #' @examples
 inmar_hmm_mle <- function(x, m, q, k, mu0, sigma0, gamma0, phi0, delta0 = NULL,
-                          stationary = TRUE, hessian = FALSE) {
+                          stationary = TRUE, hessian = FALSE,
+                          steptol = 1e-6, iterlim = 100,
+                          stepmax = 100, state = NULL) {
   parvect0 <- inmar_hmm_pn2pw(m, mu0, sigma0, gamma0, phi0, delta0,
                               stationary = stationary
   )
   mod <- nlm(inmar_hmm_mllk, parvect0,
              x = x, m = m, q = q, k = k,
-             stationary = stationary, hessian = hessian
+             stationary = stationary, hessian = hessian, state = state,
+             steptol = steptol, stepmax = stepmax, iterlim = iterlim
   )
   pn <- inmar_hmm_pw2pn(
     m = m, q = q, k = k, parvect = mod$estimate,
@@ -275,6 +302,7 @@ inmar_hmm_mle <- function(x, m, q, k, mu0, sigma0, gamma0, phi0, delta0 = NULL,
     ))
   }
 }
+
 
 #' Global decoding of states
 #'

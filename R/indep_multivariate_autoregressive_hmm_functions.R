@@ -523,7 +523,7 @@ inmar_jacobian <- function(mod, n) {
   }
 
   phi <- unlist(mod$phi, use.names = FALSE)
-  jacobian[rowcount:n, colcount:n] <- diag(phi)
+  jacobian[rowcount:n, colcount:n] <- diag(length(phi))
 
   return(jacobian)
 }

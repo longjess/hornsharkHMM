@@ -484,7 +484,7 @@ ar_jacobian <- function(mod, n) {
   }
   count <- 2 * m + count + 1
   phi <- unlist(mod$phi, use.names = FALSE)
-  jacobian[count:n, count:n] <- diag(phi)
+  jacobian[count:n, count:n] <- diag(length(phi))
   return(jacobian)
 }
 

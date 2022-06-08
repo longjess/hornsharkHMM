@@ -23,7 +23,7 @@ inmvnorm_hmm_pn2pw <- function(m, mu, sigma, gamma,
   foo <- log(gamma / diag(gamma))
   tgamma <- as.vector(foo[!diag(m)])
   if (stationary) {
-    tdelta <- NULLlibrary(de)
+    tdelta <- NULL
   }
   else {
     tdelta <- log(delta[-1] / delta[1])

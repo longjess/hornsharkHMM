@@ -77,15 +77,23 @@ inmvnorm_hmm_pw2pn <- function(m, k, parvect, stationary = TRUE) {
 #'
 #' @param x Matrix of observations, rows represent each variable
 #' @inheritParams inmvnorm_hmm_pw2pn
+#' @param state List of state values, if provided. 0 represents an unknown state value.
 #'
 #' @return Negative log-likelihood
 #' @export
 #'
 #' @examples
-inmvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE) {
+inmvnorm_hmm_mllk <- function(parvect, x, m, k, stationary = TRUE, state = NULL) {
   n <- ncol(x)
   pn <- inmvnorm_hmm_pw2pn(m, k, parvect, stationary = stationary)
-  p <- inmvnorm_densities(x, pn, m, k, n)
+
+
+  if (is.null(state)){
+    p <- inmvnorm_densities(x, pn, m, k, n)
+  } else {
+    p <- inmvnorm_densities_labelled(x, pn, m, k, n, state)
+  }
+
   foo <- matrix(pn$delta, ncol = m)
   lscale <- foralg(n, m, foo, pn$gamma, p)
   mllk <- -lscale
@@ -116,6 +124,41 @@ inmvnorm_densities <- function(x, mod, m, k, n) {
   return(p)
 }
 
+#' Get matrix of state dependent probability densities
+#'
+#' @param x Vector containing one observation
+#' @param mod List of parameters
+#' @param k Number of variables
+#' @param m Number of states
+#' @param n Number of observations
+#' @param state List of state values, if provided. 0 represents an unknown state value.
+#'
+#' @return n x m matrix of state dependent probability densities
+#' @export
+#'
+#' @examples
+inmvnorm_densities_labelled <- function(x, mod, m, k, n, state) {
+  p <- matrix(1, nrow = n, ncol = m)
+  for (i in 1:n) {
+    for (j in 1:m) {
+      if(state[i] == 0){
+        for (l in 1:k){
+          p[i, j] <- p[i, j] * dnorm(x[l, i], mod$mu[[j]][l], mod$sigma[[j]][l])
+        }
+      } else {
+        if (j == state[i]){
+          for (l in 1:k){
+            p[i, j] <- p[i, j] * dnorm(x[l, i], mod$mu[[j]][l], mod$sigma[[j]][l])
+          }
+        } else{
+          p[i, j] <- 0
+        }
+      }
+
+    }
+  }
+  return(p)
+}
 
 #' Maximum likelihood estimation of multivariate normal parameters
 #'
@@ -130,13 +173,16 @@ inmvnorm_densities <- function(x, mod, m, k, n) {
 #' initial distribution
 #' @param stationary Boolean, whether the HMM is stationary or not
 #' @param hessian Boolean, whether to return the inverse hessian
+#' @param state List of state values, if provided. 0 represents an unknown state value.
 #'
 #' @return List of results
 #' @export
 #'
 #' @examples
 inmvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
-                             stationary = TRUE, hessian = FALSE) {
+                             stationary = TRUE, hessian = FALSE,
+                             steptol = 1e-6, iterlim = 100,
+                             stepmax = 100, state = NULL) {
   parvect0 <- inmvnorm_hmm_pn2pw(
     m = m, mu = mu0, sigma = sigma0,
     gamma = gamma0, delta = delta0,
@@ -144,7 +190,8 @@ inmvnorm_hmm_mle <- function(x, m, k, mu0, sigma0, gamma0, delta0 = NULL,
   )
   mod <- nlm(inmvnorm_hmm_mllk, parvect0,
              x = x, m = m, k = k,
-             stationary = stationary, hessian = hessian
+             stationary = stationary, hessian = hessian, state = state,
+             steptol = steptol, stepmax = stepmax, iterlim = iterlim
   )
   pn <- inmvnorm_hmm_pw2pn(
     m = m, k = k, parvect = mod$estimate,

@@ -4,7 +4,7 @@
 \alias{inmvnorm_hmm_mllk}
 \title{Get negative log-likelihood from the working parameters}
 \usage{
-inmvnorm_hmm_mllk(parvect, x, m, k, stationary = TRUE)
+inmvnorm_hmm_mllk(parvect, x, m, k, stationary = TRUE, state = NULL)
 }
 \arguments{
 \item{parvect}{Vector of working parameters}
@@ -16,6 +16,8 @@ inmvnorm_hmm_mllk(parvect, x, m, k, stationary = TRUE)
 \item{k}{Number of variables}
 
 \item{stationary}{Boolean, whether the HMM is stationary or not}
+
+\item{state}{List of state values, if provided. 0 represents an unknown state value.}
 }
 \value{
 Negative log-likelihood

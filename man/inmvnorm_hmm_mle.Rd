@@ -13,7 +13,11 @@ inmvnorm_hmm_mle(
   gamma0,
   delta0 = NULL,
   stationary = TRUE,
-  hessian = FALSE
+  hessian = FALSE,
+  steptol = 1e-06,
+  iterlim = 100,
+  stepmax = 100,
+  state = NULL
 )
 }
 \arguments{
@@ -36,6 +40,8 @@ initial distribution}
 \item{stationary}{Boolean, whether the HMM is stationary or not}
 
 \item{hessian}{Boolean, whether to return the inverse hessian}
+
+\item{state}{List of state values, if provided. 0 represents an unknown state value.}
 }
 \value{
 List of results

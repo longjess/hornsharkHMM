@@ -12,6 +12,8 @@ ar_hmm_mllk(parvect, x, m, q, stationary = TRUE, state = NULL)
 \item{m}{Number of states}
 
 \item{stationary}{Boolean, whether the HMM is stationary or not}
+
+\item{state}{List of state values, if provided. 0 represents an unknown state value.}
 }
 \value{
 Negative log-likelihood

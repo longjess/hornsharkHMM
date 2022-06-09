@@ -182,6 +182,7 @@ inmar_hmm_pw2pn <- function(m, q, k, parvect, stationary = TRUE) {
 #'
 #' @param x Matrix of observations, rows represent each variable
 #' @inheritParams inmar_hmm_pw2pn
+#' @param state List of state values, if provided. 0 represents an unknown state value.
 #'
 #' @return Negative log-likelihood
 #' @export
@@ -227,19 +228,35 @@ inmar_densities <- function(x, mod, m, q, k, n) {
   return(p)
 }
 
+#' Get matrix of state dependent probability densities, for some states known
+#'
+#' @inheritParams inmar_hmm_mllk
+#' @param mod List of parameters
+#' @param n Number of observations
+#'
+#' @return n x m matrix of state dependent probability densities
+#' @export
+#'
+#' @examples
 inmar_densities_labelled <- function(x, mod, m, q, k, n, state) {
   p <- matrix(1, nrow = n, ncol = m)
   means <- get_all_inmar_means(x, mod, m, q, k)
   for (i in 1:n) {
     for (j in 1:m) {
-      if (j == state[i]){
+      if(state[i] == 0){
         for (l in 1:k){
           p[i, j] <- p[i, j] * dnorm(x[l, i], means[[j]][i, l], mod$sigma[[j]][l])
         }
+      } else {
+        if (j == state[i]){
+          for (l in 1:k){
+            p[i, j] <- p[i, j] * dnorm(x[l, i], means[[j]][i, l], mod$sigma[[j]][l])
+          }
+        } else{
+          p[i, j] <- 0
+        }
       }
-      else{
-        p[i, j] <- 0
-      }
+
     }
   }
   return(p)

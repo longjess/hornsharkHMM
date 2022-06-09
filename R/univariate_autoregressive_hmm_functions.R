@@ -158,6 +158,7 @@ ar_hmm_pw2pn <- function(m, q, parvect, stationary = TRUE) {
 #'
 #' @param x Vector of observations
 #' @inheritParams ar_hmm_pn2pw
+#' @param state List of state values, if provided. 0 represents an unknown state value.
 #'
 #' @return Negative log-likelihood
 #' @export
@@ -199,6 +200,16 @@ ar_densities <- function(x, mod, m, q, n) {
   return(p)
 }
 
+#' Returns densities for autoregressive model, for some states known
+#'
+#' @inheritParams ar_hmm_mllk
+#' @param mod List of parameters
+#' @param n Number of observations
+#'
+#' @return n x m matrix of state dependent probability densities
+#' @export
+#'
+#' @examples
 ar_densities_labelled <- function(x, mod, m, q, n, state) {
   p <- matrix(0, nrow = n, ncol = m)
   means <- get_all_ar_means(mod$mu, mod$phi, m, q, x)

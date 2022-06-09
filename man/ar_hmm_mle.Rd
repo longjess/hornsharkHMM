@@ -14,7 +14,11 @@ ar_hmm_mle(
   phi0,
   delta0 = NULL,
   stationary = TRUE,
-  hessian = FALSE
+  hessian = FALSE,
+  steptol = 1e-06,
+  iterlim = 100,
+  stepmax = 100,
+  state = NULL
 )
 }
 \arguments{

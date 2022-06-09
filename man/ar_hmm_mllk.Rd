@@ -4,7 +4,7 @@
 \alias{ar_hmm_mllk}
 \title{Get negative log-likelihood from the working parameters}
 \usage{
-ar_hmm_mllk(parvect, x, m, q, stationary = TRUE)
+ar_hmm_mllk(parvect, x, m, q, stationary = TRUE, state = NULL)
 }
 \arguments{
 \item{x}{Vector of observations}
